@@ -8,8 +8,15 @@ This script is in strong relation to method makeNetlist from reproduction.py (! 
 
 Note that including many ('Quantity') elements will result in a huge (sum of every 'Quantity' times 'NofPins' in buildBlocks) connection matrix. This can result in longer "matrix to netlist" conversion time and can also widen the algorithm search space, which can - on one hand - increase possibilities of reaching an optimum solution - but on the other hand - significantly increase the time to find a solution. 
 
+'Model' property: Multiple models can be listed. In normal mode only the first one is used. In nofailure mode all models are available to be used while simulating the robustness of the circuit. 
+
 My advice - before you trigger the run, make sure you know, what kind of a circuit are you looking for. 
 """
+import numpy as np
+# This array contains the set of circuit nodes, that are accessible to the outer world. 
+outerConns = ['gnd','vcc','vout']
+
+
 #NOTE: Set Quantity, do not touch others.
 buildBlocks =  [
       {	#Simple resistor
@@ -211,3 +218,41 @@ paramBounds = {
   #TODO: parameter values based on standard scale
 	# add "standard scale" as option
 	# problem for PSADE - optimizes continiousely
+
+
+NofOutConns = len(outerConns)		#number of outerConnections - such as Vin, Vout, GND. NOTE: When changing this, one has also zo update the makeNetlist method from reproduction.py . 
+
+# Moved to buildingBlocksBank.
+
+#Global values NOTE: strictly follow the sequence in buildBlocks if changing the software!
+
+#Calculating various global variables connected to matrix representation of a circuit
+ALLPINS = np.array([], dtype=int)	#number of pins for each device type in an array
+for element in buildBlocks:
+  ALLPINS = np.append(ALLPINS,  element['NofPins']*element['Quantity'])
+
+BigMatrixSize = 0
+for element in buildBlocks:
+  BigMatrixSize = BigMatrixSize + element['NofPins']*element['Quantity']
+BigMatrixSize = BigMatrixSize + NofOutConns
+
+NofPARAMS = 0
+for element in buildBlocks:
+  NofPARAMS = NofPARAMS + len(element['ParamTypes'])*element['Quantity']
+  
+for element in buildBlocks:
+  if element['NofPins'] == 0:
+      raise ValueError('An electrical element in buildingBlocksBank cannot have 0 (zero) pins (electrical terminals).')
+
+
+	  
+Nof2poles = 0
+Nof3poles = 0
+Nof4poles = 0
+for element in buildBlocks:
+  if element['NofPins'] == 2:
+    Nof2poles += element['Quantity']
+  if element['NofPins'] == 3:
+    Nof3poles += element['Quantity']
+  if element['NofPins'] == 4:
+    Nof4poles += element['Quantity']

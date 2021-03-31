@@ -22,8 +22,8 @@ PROBLEMname = 'scoreCirc_CmosVoltageReference_2'
 # scoreCirc_HighPass
 
 seedN = 0		#random seed
-continuee = 	1	#to continue the algorithm from the last run
-optimise = 	1	#turn on/off the global parameter optimizer PSADE
+continuee = 	0	#to continue the algorithm from the last run
+optimise = 	0	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve
 
 			#(if continuee == 1) 
@@ -33,7 +33,7 @@ insertAdam = 	0	#insert a working circuit to further evolve
 debug = 0
 
 #Evolutionary algorythm parameters:-----------------
-multipl = 	4
+multipl = 	1
 POP_SIZE = 	100*multipl
 NofElite =  	2*multipl
 NofRANDOMS = 	20*multipl
@@ -49,36 +49,7 @@ minimalScore = 0.01 	#stopping criteria based on Score (cost function)
 DONE = 0		#global variable that is set to 1 when an individual fulfills criteria
 #---------------------------------------------------
 
-NofOutConns = 3		#number of outerConnections - such as Vin, Vout, GND. NOTE: When changing this, one has also zo update the makeNetlist method from reproduction.py . 
 
-#TODO the code below to be moved to buildingBlocksBank.py maybe some time.
-
-#Global values NOTE: strictly follow the sequence in buildBlocks if changing the software!
-
-#Calculating various global variables connected to matrix representation of a circuit
-ALLPINS = np.array([], dtype=int)	#number of pins for each device type in an array
-for element in buildBlocks:
-  ALLPINS = np.append(ALLPINS,  element['NofPins']*element['Quantity'])
-
-BigMatrixSize = 0
-for element in buildBlocks:
-  BigMatrixSize = BigMatrixSize + element['NofPins']*element['Quantity']
-BigMatrixSize = BigMatrixSize + NofOutConns
-
-NofPARAMS = 0
-for element in buildBlocks:
-  NofPARAMS = NofPARAMS + len(element['ParamTypes'])*element['Quantity']
-	  
-Nof2poles = 0
-Nof3poles = 0
-Nof4poles = 0
-for element in buildBlocks:
-  if element['NofPins'] == 2:
-    Nof2poles += element['Quantity']
-  if element['NofPins'] == 3:
-    Nof3poles += element['Quantity']
-  if element['NofPins'] == 4:
-    Nof4poles += element['Quantity']
 
 #MODELS (Obsolete. Already set in buildingBlocksBank.)
 MODEL_ZENER = 	"zd4v7"

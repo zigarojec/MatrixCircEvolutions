@@ -8,8 +8,8 @@ Adam is inserted in initial population if insertAdam variable is set to True in 
 
 
 import numpy as np
-import globalVars as gV
 from utils import createRandomBigCircuitMatrix, circuit
+from buildingBlocksBank import BigMatrixSize
 
 #---ADAM----
 
@@ -17,7 +17,7 @@ ValueVector = np.array([1e2, 1e2, 1e3, 1e4, 1.8e3])
 
 vezje = createRandomBigCircuitMatrix(ValueVector).BigCircuitMatrix
 
-AdamMtrx = np.zeros(shape=(gV.BigMatrixSize,gV.BigMatrixSize),dtype=bool)
+AdamMtrx = np.zeros(shape=(BigMatrixSize,BigMatrixSize),dtype=bool)
 
 #Here we have a simple voltage reference, using zener diode with break-down voltage of 4.3V.
 # CLASSICAL WIDLAR BANDGAP VOLTAGE REFERENCE with additional transistors for search

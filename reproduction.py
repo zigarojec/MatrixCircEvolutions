@@ -3,22 +3,18 @@ import random
 from copy import copy, deepcopy
 import os
 from time import time
-import pyopus.evaluator.measure as pyo
 
-from globalVars import *
-import AdamAndEve as AE
 #import runme2
 from utils import *
 import pickle
 import sys
 import collections
 
-##Optimisation modules *moved to paramOptimizer.py along with circuitUnderOptimiser class and functions
-#from pyopus.optimizer.psade import ParallelSADE
-#from pyopus.optimizer.hj import HookeJeeves
-#from pyopus.optimizer.qpmads import QPMADS
-#from pyopus.optimizer.boxcomplex import BoxComplex
-#from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
+import pyopus.evaluator.measure as pyo
+
+from globalVars import *
+import AdamAndEve as AE
+import buildingBlocksBank as bBB
 
 
 #class population:
@@ -244,7 +240,7 @@ def halfhalfCrossover(ind1, ind2):
 	
 	#Security - if any empty matrix, return parents!
 	if (checkNofOnes(OutConns_gene_1) < 1) | (checkNofOnes(OutConns_gene_2) < 1) | (checkNofOnes(InterConns_gene_1) < 1) | (checkNofOnes(InterConns_gene_2) < 1):
-	  print "Error: matrix or part of matrix is empty. Cannot return sorted non zero indices."
+	  print ("Error: matrix or part of matrix is empty. Cannot return sorted non zero indices.")
 	  return ind1, ind2
 	else:
 	  rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(OutConns_gene_1)
@@ -636,6 +632,118 @@ def mutationREMOVEnode(ind1):
 	return child1	
 	
 
+
+
+
+
+
+def makeNetlist_netlister(circuit): #, generationNum, individualNum
+    """
+    This is a simplified version of makeNetlist function which depends on buildingBlocksBank as an input for netlist building. 
+    This netlister 
+    TODO
+    """
+    BigCircuitMatrix = circuit.BigCircuitMatrix
+    ValueVector = circuit.ValueVector
+    HOTCIRC = "HOT_CIRCUIT"		#Name of the current netlist
+
+    nodesBank = np.zeros(shape=(bBB.BigMatrixSize),dtype=int)	#empty 1D container of node numbers for each element pins
+    OutConnsBank = {}	#will contain where nodes GND, Vp, Vn and so on are meant to be
+
+    FullBigCircuitMatrix = circuit.fullRedundancyMatrix
+
+    #Locations of non zero elements
+    rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(FullBigCircuitMatrix)
+
+    #make nodes bank with just looking "up" in BigCircuitMatrix
+    for i in range(0,bBB.BigMatrixSize):
+        up = np.where(columnsC == i)
+        right = np.where(rowsR == i)
+        #look up
+        for j in up:
+            nodesBank[i] = min(rowsC[j])+1 	#increment the node number to keep 0 for Spice GND
+        if i > (bBB.BigMatrixSize-1-bBB.NofOutConns):
+            OutConnsBank[i] = nodesBank[i]  
+            
+    #TODO add nodesBank to the circuit object!
+
+    #Open empty file for netlist
+    ID = str(circuit.PROBLEMname) + "_g_" + str(circuit.generationNum) + "_i_" + str(circuit.individualNum)
+    netlistName = ID + "_subckt.cir"
+    circ = open(netlistName, "w")
+    circ.write("*%s \n" %netlistName)
+    
+    # Write first line of subcircuit
+    circ.write(".SUBCKT %s " %(HOTCIRC))
+    for i in range(0,NofOutConns):
+        circ.write("%d " %OutConnsBank[BigMatrixSize-NofOutConns+i])
+    circ.write("\n")
+    
+    # Netlist writedown:
+
+    value_index = 0		#goes with ValueVector which contains element values
+    multipl_index = 0	#goes with Multipl, which contains multiplication factors for mos (only integer)
+    
+    # Create array of nodenumbers for each element in use.
+    
+    fromindex = 0
+    nodesBankSliced = []; # Python list, different lengths. 
+    
+    for buildingBlockTypeNo, buildingBlockType in enumerate(bBB.buildBlocks):
+        for buildingBlockNo in range(1, buildingBlockType['Quantity']+1):   # Count, not index.
+            #print("Writing buildingBlock ",buildingBlockType['Element'] , buildingBlockTypeNo, "->",  buildingBlockNo)
+            
+            # Place all nodes of the element in an array. 
+            # Use the set() method to convert the list into a set. Now, if all the elements in the list are equal, the set will contain only one element. This means that element terminals are connected to each other (element not used).
+
+            toindex = fromindex + buildingBlockType['NofPins']
+            buildingBlockElmNodes = nodesBank[fromindex:toindex]
+            nodesBankSliced.append(buildingBlockElmNodes)
+            
+            if(len(set(buildingBlockElmNodes)) == 1):
+                circ.write("*") #exclude element from netlist if element pins connected together
+            
+            circ.write("%s%s_%s " %(buildingBlockType['SpiceElementType'], buildingBlockType['Element'], buildingBlockNo))	#put spice name of element
+            circ.write("(")
+            for node in buildingBlockElmNodes:
+                circ.write("%s "  %node)
+            circ.write(")")
+
+            if len(buildingBlockType['Model'])>0:
+                # Pisi model
+                # If multiple Models available we should have a mechanism to choose which to use in this netlist.
+                
+                circ.write(" %s " %buildingBlockType['Model']) # For now only FIRST model found. 
+                
+            
+            if len(buildingBlockType['ParamTypes'])>0:
+                # Pisi parametre
+                # TODO Parameters should match the name, not the type. (Extra field in bBB?) 
+                for param in buildingBlockType['ParamTypes']:
+                    circ.write(" %s = %s " %(param, ValueVector[value_index]))
+                    value_index += 1
+
+            
+            circ.write("\n");
+            # Move further
+            fromindex = toindex
+        
+        if buildingBlockType['Quantity']>0: # Make empty line for groups of building blocks in netlist. 
+            circ.write("\n");
+            
+    #convergence aid
+    #add 1 GOhm between every node and GND to help HSpice converge if dangling nodes in circuit. Added 13.5.2016. Looks it works fine.
+    circ.write("\n*Convergence-aid resistors:\n")
+    for i in set(nodesBank):  
+        circ.write("R_%s %s " %(np.max(nodesBank)+1+i, i))	#put name of element and + node
+        circ.write("%s %s \n" %("0", "1e9"))	#put - node and value	
+        
+    circ.write(".ends\n")
+
+    circ.close()
+
+
+
 def makeNetlist(circuit, generationNum, individualNum, FullBigCircuitMatrix):
 	"""Make netlist from circuit object"""
 	BigCircuitMatrix = circuit.BigCircuitMatrix
@@ -700,7 +808,7 @@ def makeNetlist(circuit, generationNum, individualNum, FullBigCircuitMatrix):
 
 	#---------------------------	
 	#---------------------------	
-
+    # TODO Tukaj nadaljuj
 	value_index = 0		#goes with ValueVector which contains element values
 	multipl_index = 0	#goes with Multipl, which contains multiplication factors for mos (only integer)
 	#go thru all lines except connections (GND, Vp, Vn, Vin1, Vin2, Vout1, Vout2 - they shall not connect to each other!)
@@ -1005,7 +1113,7 @@ def makeNetlist2(circuit, generationNum, individualNum, FullBigCircuitMatrix):
 			nodesBank[i] = min(rowsC[j])+1 	#increment the node number to keep 0 for Spice GND
 		if i > (BigMatrixSize-1-NofOutConns):
 			OutConnsBank[i] = nodesBank[i]	
-	print nodesBank
+	print(nodesBank)
 	#print "OutConnsBank: ",OutConnsBank
 	
 	#another solution to gain nodesBank without need for fullRedundancyBigCircuitMatrix  #
@@ -1014,21 +1122,21 @@ def makeNetlist2(circuit, generationNum, individualNum, FullBigCircuitMatrix):
 	nodesBank2 = np.zeros(shape=(BigMatrixSize),dtype=int)                               #
 	for i in range(0,BigMatrixSize):                                                     #
 	  up = np.where(columnsC == i)[0]                                                    #
-	  print up                                                                           #
+	  print(up)                                                                          #
 	  if len(up)==1:                                                                     #
 	    nodesBank2[i] = rowsC[np.min(up)]                                                #
 	  elif len(up)>1:                                                                    #
 	    while len(up)>1:                                                                 #
 	      #hodi gor, levo,                                                               #
 	      up = np.where(columnsC == rowsC[np.min(up)])[0]                                #
-	      print "\t",up                                                                  #
+	      print("\t",up)                                                                 #
 	    nodesBank2[i] = rowsC[np.min(up)]                                                #
 	nodesBank2 = nodesBank2 + 1                                                          #
-	print nodesBank2                                                                     #
+	print(nodesBank2)                                                                    #
 	
 	#test
 	if not all(nodesBank == nodesBank2):
-	  print nodesBank == nodesBank2
+	  print(nodesBank == nodesBank2)
 	  raw_input()
 	
 	
@@ -1355,22 +1463,22 @@ def geneticOperation(parent1, parent2, generationNum):
     if random.uniform(0,1) < topologyGenOperProb:
       choice = random.randint(0,2)
       if choice == 0:
-	mut1 = mutationADDnode(parent1)
-	mut2 = mutationADDnode(parent2)
-	family.add_individual(deepcopy(mut1))
-	family.add_individual(deepcopy(mut2))
+        mut1 = mutationADDnode(parent1)
+        mut2 = mutationADDnode(parent2)
+        family.add_individual(deepcopy(mut1))
+        family.add_individual(deepcopy(mut2))
       elif choice == 1:
-	mut1 = mutationREMOVEnode(parent1)
-	mut2 = mutationREMOVEnode(parent2)
-	family.add_individual(deepcopy(mut1))
-	family.add_individual(deepcopy(mut2))
+        mut1 = mutationREMOVEnode(parent1)
+        mut2 = mutationREMOVEnode(parent2)
+        family.add_individual(deepcopy(mut1))
+        family.add_individual(deepcopy(mut2))
       elif choice == 2:
-	mut1 = mutationREMOVEnode(parent1)
-	mut1 = mutationADDnode(mut1)
-	mut2 = mutationREMOVEnode(parent2)
-	mut2 = mutationADDnode(mut2)		    
-	family.add_individual(deepcopy(mut1))
-	family.add_individual(deepcopy(mut2))
+        mut1 = mutationREMOVEnode(parent1)
+        mut1 = mutationADDnode(mut1)
+        mut2 = mutationREMOVEnode(parent2)
+        mut2 = mutationADDnode(mut2)		    
+        family.add_individual(deepcopy(mut1))
+        family.add_individual(deepcopy(mut2))
     else:
       #ValueVector mutation
       mut1, mut2 = valueReproduction(parent1, parent2, crossover="mutation")
@@ -1391,52 +1499,52 @@ def geneticOperation3(parent1, parent2, generationNum):
     matingRND = random.uniform(0,1)
     topologyGenOperRND = random.uniform(0,1)
     mutationRND = random.randint(0,3)
-    if debug: print "Generated random numbers for tournamnet:", matingRND, topologyGenOperRND, mutationRND
+    if debug: print("Generated random numbers for tournamnet:", matingRND, topologyGenOperRND, mutationRND)
   
     if matingRND < matingProb:
       if topologyGenOperRND < topologyGenOperProb:
-	child1, child2 = pinViseCrossover2(parent1, parent2)
-	children.append(copy(child1))#deep
-	children.append(copy(child2))#deep
-	if debug: print "mtrx pinVise"
+        child1, child2 = pinViseCrossover2(parent1, parent2)
+        children.append(copy(child1))#deep
+        children.append(copy(child2))#deep
+        if debug: print("mtrx pinVise")
       else:
-	#sliceValueCrossover
-	child1, child2 = valueReproduction(parent1, parent2,crossover="sliceCrossover")
-	children.append(copy(child1))#deep
-	children.append(copy(child2))#deep
-	if debug: print "valu sliceValueXO"
+        #sliceValueCrossover
+        child1, child2 = valueReproduction(parent1, parent2,crossover="sliceCrossover")
+        children.append(copy(child1))#deep
+        children.append(copy(child2))#deep
+        if debug: print("valu sliceValueXO")
     else:
       if topologyGenOperRND < topologyGenOperProb:
-	choice = mutationRND
-	if choice == 0:
-	  mut1 = mutationADDnode(parent1)
-	  mut2 = mutationADDnode(parent2)
-	  children.append(copy(mut1))#deep
-	  children.append(copy(mut2))#deep
-	  if debug: print "mtrx ADD node"
-	elif choice == 1:
-	  mut1 = mutationREMOVEnode(parent1)
-	  mut2 = mutationREMOVEnode(parent2)
-	  children.append(copy(mut1))#deep
-	  children.append(copy(mut2))#deep
-	  if debug: print "mtrx REMOVE node"
-	elif choice == 2:
-	  mut1 = mutationREMOVEnode(parent1)
-	  mut1 = mutationADDnode(mut1)
-	  mut2 = mutationREMOVEnode(parent2)
-	  mut2 = mutationADDnode(mut2)
-	  if debug: print "mtrx MOVE node"
-	  children.append(copy(mut1))#deep
-	  children.append(copy(mut2))#deep
-	elif choice == 3:
-	  children.append(copy(createRandomBigCircuitMatrix(copy(createRandomValueVector()))))#deep
-	  children.append(copy(createRandomBigCircuitMatrix(copy(createRandomValueVector()))))#deep
+        choice = mutationRND
+        if choice == 0:
+            mut1 = mutationADDnode(parent1)
+            mut2 = mutationADDnode(parent2)
+            children.append(copy(mut1))#deep
+            children.append(copy(mut2))#deep
+            if debug: print("mtrx ADD node")
+        elif choice == 1:
+            mut1 = mutationREMOVEnode(parent1)
+            mut2 = mutationREMOVEnode(parent2)
+            children.append(copy(mut1))#deep
+            children.append(copy(mut2))#deep
+            if debug: print("mtrx REMOVE node")
+        elif choice == 2:
+            mut1 = mutationREMOVEnode(parent1)
+            mut1 = mutationADDnode(mut1)
+            mut2 = mutationREMOVEnode(parent2)
+            mut2 = mutationADDnode(mut2)
+            if debug: print("mtrx MOVE node")
+            children.append(copy(mut1))#deep
+            children.append(copy(mut2))#deep
+        elif choice == 3:
+            children.append(copy(createRandomBigCircuitMatrix(copy(createRandomValueVector()))))#deep
+            children.append(copy(createRandomBigCircuitMatrix(copy(createRandomValueVector()))))#deep
       else:
-	#ValueVector mutation
-	mut1, mut2 = valueReproduction(parent1, parent2, crossover="mutation")
-	children.append(copy(mut1))#deep
-	children.append(copy(mut2))#deep
-	if debug: print "valu mutate"
+        #ValueVector mutation
+        mut1, mut2 = valueReproduction(parent1, parent2, crossover="mutation")
+        children.append(copy(mut1))#deep
+        children.append(copy(mut2))#deep
+        if debug: print("valu mutate")
 	
     #duplicantsFound = False
     #print "reduMtrxHash", [parent1.reduMtrxHash, parent2.reduMtrxHash, children[0].reduMtrxHash, children[1].reduMtrxHash]

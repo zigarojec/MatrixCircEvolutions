@@ -22,13 +22,15 @@ from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
 
 #My modules
 from globalVars import *
-import AdamAndEve as AE
+#import AdamAndEve as AE
+import adam_dict #The new Adam
 from reproduction import *
 from scoreFunctions import *
 from paramOptimizer import *
+from buildingBlocksBank import *
 
 #Other settings
-np.set_printoptions(threshold='nan', linewidth=1000)	#print whole matrix when finished
+np.set_printoptions(threshold=sys.maxsize, linewidth=1000)	#print whole matrix when finished
 #Settings
 random.seed(seedN)	#Fixed seed
 np.random.seed(seedN)
@@ -46,14 +48,14 @@ MOEAMODE = 0 # DO NOT CHANGE
 if __name__=='__main__':
   #---------------------------------------------------
   t0 = time()
-  print
-  print "++++++++++++++++++++++++++++++++++++++++++++"
-  print "+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n"
+  print()
+  print("++++++++++++++++++++++++++++++++++++++++++++")
+  print( "+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n")
 
   ###MINI EVOLUTION CYCLE	
   startdate = strftime("%Y_%m_%d")
   starttime = strftime("%H-%M")
-  print "Starting date: ", startdate, ", starting time: ", starttime
+  print("Starting date: ", startdate, ", starting time: ", starttime)
 
   os.chdir("../_MAIN_data")
 
@@ -93,7 +95,7 @@ if __name__=='__main__':
       data = pickle.load(pkl_file)
     pkl_file.close()
     
-    print "Ressurecting old population. Press any to proceed..."
+    print("Ressurecting old population. Press any to proceed...")
     generation = data[0]
     generationNum = 0#data[1]
     bestScoresList = data[2]
@@ -106,31 +108,32 @@ if __name__=='__main__':
     #generations.append(generation)
     hotGen = deepcopy(generation)
     
-    raw_input("...old population resurrected.")
+    input("...old population resurrected.")
   else:
-    print "Creating initial population. Press any to proceed..."   
+    print("Creating initial population. Press any to proceed...")
     
     NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,POP_SIZE)), remote=True)
     for i in range(0,POP_SIZE):
       hotGen.add_individual(NEWindividuals[i])
     
     if insertAdam:
-      hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
-      hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
-      print "Adam-circuit inserted into population."
-    raw_input("...initial population created.")
+      #hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
+      #hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
+      print("Adam-circuit NOT inserted into population.")
+    input("...initial population created.")
+    
   
   #---CREATE INITIAL POPULATION---#
   #---EVALUATE & SORT INITIAL POPULATION---# 
-  print "EVALUATING GENERATION %d" %generationNum
+  print("EVALUATING GENERATION %d" %generationNum)
   stw0 = time()
   #Parallel!! :)
   results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0,len(hotGen.pool))), remote=True)
   results = np.array(results)
   
   stw1 = time()
-  print "Evaluation of initial population lasted for %f s" %(stw1-stw0)
-  #raw_input("Tisni!")
+  print("Evaluation of initial population lasted for %f s" %(stw1-stw0))
+  #input("Tisni!")
 
   hotGen.scores = np.transpose(results[:,0])
   #hotGen.matrixDensities = np.transpose(results[:,1])
@@ -141,7 +144,7 @@ if __name__=='__main__':
   currentBestScore = hotGen.scores[sortedPool_Indices[0]]
   
   #najboljsi v generaciji je...
-  print ":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore)
+  print(":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore))
   
   printer(results[sortedPool_Indices[0]], stw0, generationNum, problem=PROBLEMname)
   bestScoresList.append(hotGen.scores[sortedPool_Indices[0]])
@@ -164,7 +167,7 @@ if __name__=='__main__':
       parent2 = matingPool.pool[random.randint(len(mP_SortedIndices)/2,len(mP_SortedIndices)-1)]
       family = geneticOperation(parent1, parent2, generationNum)
       for j in range(0, len(family.pool)):
-	tempPool.add_individual(family.pool[j])
+        tempPool.add_individual(family.pool[j])
     
     #dispach creating of full redundance in circuit matrices
     individuals = cOS.dispatch(jobList=((dispatchCircuitObjectGeneration, [tempPool.pool[i], i]) for i in range(0,len(tempPool.pool))), remote=True)
@@ -214,25 +217,25 @@ if __name__=='__main__':
     if (optimise == True) & (((generationNum > 30) & (deltaScore < 1.0) & (not generationNum%20)) | (generationNum < 2)):
       bestToOptimise = [0, random.randint(1,NofElite), random.randint(NofElite+1, 10*NofElite)]
       if generationNum < 2:
-	bestToOptimise = [0] #in first generation optimise just adam!
+        bestToOptimise = [0] #in first generation optimise just adam!
      
       for i in bestToOptimise:
-	topology = copy(tempPool.pool[sortedTempPool_Indices[i]].BigCircuitMatrix)
-	values = copy(tempPool.pool[sortedTempPool_Indices[i]].ValueVector)
+        topology = copy(tempPool.pool[sortedTempPool_Indices[i]].BigCircuitMatrix)
+        values = copy(tempPool.pool[sortedTempPool_Indices[i]].ValueVector)
 
-	print "Circuit ", i, "from gen", generationNum, "..."
-	maxiter = 3000 if generationNum < 100 else 8000
-	x, f = optimiseCircuit(topology, values, maxiter)
-	tempPool.pool = np.append(deepcopy(circuit(topology, x)), tempPool.pool)
-	tempPool.pool[0] = dispatchCircuitObjectGeneration(tempPool.pool[0],0)
-	
-	tempPool.scores = np.append(copy(np.float64(f)),tempPool.scores)
-	#tempPool.matrixDensities = np.append(copy(tempPool.matrixDensities[sortedTempPool_Indices[i]]), tempPool.matrixDensities)
-	#tempPool.matrixQuaziIDs = np.append(copy(tempPool.matrixQuaziIDs[sortedTempPool_Indices[i]]), tempPool.matrixQuaziIDs)
-	
-	#sort them again
-	sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
-	sortedTempPool_Indices = list(sortedTempPool_Indices)
+        print("Circuit ", i, "from gen", generationNum, "...")
+        maxiter = 3000 if generationNum < 100 else 8000
+        x, f = optimiseCircuit(topology, values, maxiter)
+        tempPool.pool = np.append(deepcopy(circuit(topology, x)), tempPool.pool)
+        tempPool.pool[0] = dispatchCircuitObjectGeneration(tempPool.pool[0],0)
+        
+        tempPool.scores = np.append(copy(np.float64(f)),tempPool.scores)
+        #tempPool.matrixDensities = np.append(copy(tempPool.matrixDensities[sortedTempPool_Indices[i]]), tempPool.matrixDensities)
+        #tempPool.matrixQuaziIDs = np.append(copy(tempPool.matrixQuaziIDs[sortedTempPool_Indices[i]]), tempPool.matrixQuaziIDs)
+        
+        #sort them again
+        sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
+        sortedTempPool_Indices = list(sortedTempPool_Indices)
     
     #-------------#  
 
@@ -275,7 +278,7 @@ if __name__=='__main__':
     #if int(currentBestScore) > int(min(bestScoresList)): #Jao dzubre kaj si blesav!
     #  print "Something went wrong BADLY."
     #  print bestScoresList
-    #  raw_input()
+    #  input()
     
     #---Saving results, picle, ...  and so on----#
 
@@ -311,5 +314,5 @@ if __name__=='__main__':
 
   
   cOS.finalize()
-  print "\n+++	 MATRIX EVOLUTIONS ENDED	+++"
-  print "+++++++++++++++++++++++++++++++++++++++++++"
+  print("\n+++	 MATRIX EVOLUTIONS ENDED	+++")
+  print("+++++++++++++++++++++++++++++++++++++++++++")

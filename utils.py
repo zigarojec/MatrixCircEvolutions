@@ -5,6 +5,7 @@ from time import time, strftime
 import collections
 
 from globalVars import *
+from buildingBlocksBank import *
 
 
 #general circuit class
@@ -22,40 +23,45 @@ class slimCircuit:
 		self.ValueVector = ValueVector
 		
 class circuit:
-	"""
-	We make the circuit object. 
-	Just putting together everything an individual represents. 
-	"""
-	def __init__(self, BigCircuitMatrix, ValueVector):
-		self.BigCircuitMatrix = BigCircuitMatrix
-		self.fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
-		#self.fullRedundancyMatrix = None
-		self.ValueVector = ValueVector
-		
-		rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(self.BigCircuitMatrix)
-		self.matrixDensity = float(len(rowsR))/float((BigMatrixSize*BigMatrixSize/2))	#(ones/(all/2))
-		self.reduMtrxHash = hash(self.fullRedundancyMatrix.tostring())
-		self.mtrxHash = hash(self.BigCircuitMatrix.tostring())
-		self.valuHash = hash(self.ValueVector.tostring())
-		self.fullHash = self.reduMtrxHash + self.valuHash
-		#----added for MOEA
-		self.dominatesThose = []
-		self.isDominatedByThatMany = None
-		self.rank = None
-		#self.objectivesScore = np.array([np.inf, np.inf, np.inf])
-		self.objectivesScore = []
+    """
+    We make the circuit object. 
+    Just putting together everything an individual represents. 
+    """
+    def __init__(self, BigCircuitMatrix, ValueVector):
+        
+        self.PROBLEMname = PROBLEMname    # from globalVars
 
-		#self.scoreHash = hash(self.objectivesScore.tostring())
-		self.crow_dist = None
-		#----ALPS
-		self.age = None
-	@property
-	def scoreHash(self):
-		return hash(np.array(self.objectivesScore).tostring())
+        self.BigCircuitMatrix = BigCircuitMatrix
+        self.fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
+        #self.fullRedundancyMatrix = None
+        self.ValueVector = ValueVector
+
+        self.generationNum = None    # TEST!
+        self.individualNum = None    # TEST!
+
+        rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(self.BigCircuitMatrix)
+        self.matrixDensity = float(len(rowsR))/float((BigMatrixSize*BigMatrixSize/2))	#(ones/(all/2))
+        self.reduMtrxHash = hash(self.fullRedundancyMatrix.tostring())
+        self.mtrxHash = hash(self.BigCircuitMatrix.tostring())
+        self.valuHash = hash(self.ValueVector.tostring())
+        self.fullHash = self.reduMtrxHash + self.valuHash
+        #----added for MOEA
+        self.dominatesThose = []
+        self.isDominatedByThatMany = None
+        self.rank = None
+        #self.objectivesScore = np.array([np.inf, np.inf, np.inf])
+        self.objectivesScore = []
+
+        #self.scoreHash = hash(self.objectivesScore.tostring())
+        self.crow_dist = None
+        #----ALPS
+        self.age = None
+    @property
+    def scoreHash(self):
+        return hash(np.array(self.objectivesScore).tostring())
 
 def createRandomBigCircuitMatrix(ValueVector):
-	"""Creates a random BigCircuitMatrix, with random connection in each row.
-	  Takes an individual as an argument from which it gets ValueMatrix."""
+	"""Creates a random BigCircuitMatrix, with random connection in each row. Takes an individual as an argument from which it gets ValueMatrix."""
 	ind1_MX = emptyBigMatrix()	
 	OutConns_gene_1 = np.zeros([NofOutConns,BigMatrixSize-NofOutConns], dtype=bool)
 	InterConns_gene_1 = np.zeros([BigMatrixSize-NofOutConns, BigMatrixSize-NofOutConns], dtype=bool)
@@ -123,7 +129,7 @@ def createRandomValueVector():
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
       for params in element['ParamTypes']:
-	randomValueVector = np.append(randomValueVector, random.uniform(paramBounds[params]['min'], paramBounds[params]['max']))
+        randomValueVector = np.append(randomValueVector, random.uniform(paramBounds[params]['min'], paramBounds[params]['max']))
   return randomValueVector
 
 
@@ -133,7 +139,7 @@ def returnMaxValueVector():
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
       for params in element['ParamTypes']:
-	MaxValueVector = np.append(MaxValueVector, paramBounds[params]['max'])
+        MaxValueVector = np.append(MaxValueVector, paramBounds[params]['max'])
   return MaxValueVector
 
 def returnMinValueVector():
@@ -142,7 +148,7 @@ def returnMinValueVector():
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
       for params in element['ParamTypes']:
-	MinValueVector = np.append(MinValueVector, paramBounds[params]['min'])
+        MinValueVector = np.append(MinValueVector, paramBounds[params]['min'])
   return MinValueVector
 
 
@@ -178,7 +184,7 @@ def sortedNonZeroIndices(BigCircuitMatrix):
 	  return rowsR,columnsR,columnsC,rowsC
 	
 	else:
-	  print "sortedNonZeroIndices error. Matrix is empty. Cannot return sorted non zero indices."
+	  print("sortedNonZeroIndices error. Matrix is empty. Cannot return sorted non zero indices.")
 	  columnsC = None
 	  rowsC = None
 	  return rowsR,columnsR,columnsC,rowsC 
@@ -195,7 +201,7 @@ def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
 	while allDone == 0:
 		count+=1
 		allDone = 1
-		#print "Perform cross check (look-up-and-right-and-put-diagonal) for every square..."
+		#print("Perform cross check (look-up-and-right-and-put-diagonal) for every square...")
 		"""
 		for i in range(BigMatrixSize):
 			up = np.where(columnsC == i)
@@ -205,7 +211,7 @@ def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
 					if(not BCMx[rowsC[j]][columnsR[k]]):
 						BCMx[rowsC[j]][columnsR[k]] = True
 						allDone = 0
-						#print "	BCMx (look-up-and-right-and-put-diagonal) repairment made [row, column] [",rowsC[j],",",columnsR[k],"]"
+						#print( "	BCMx (look-up-and-right-and-put-diagonal) repairment made [row, column] [",rowsC[j],",",columnsR[k],"]")
 						
 			rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(BCMx)	#to refresh changes
 		"""
@@ -218,10 +224,10 @@ def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
 					if(not BCMx[j][k]):
 						BCMx[j][k] = True
 						allDone = 0
-						#print "	BCMx (look-up-and-right-and-put-diagonal) repairment made [row, column] [",rowsC[j],",",columnsR[k],"]"
+						#print( "	BCMx (look-up-and-right-and-put-diagonal) repairment made [row, column] [",rowsC[j],",",columnsR[k],"]")
 						
 			rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(BCMx)	#to refresh changes		
-		#print "Perform left check bottom-up (look-up-and-put-left) for each in a row..."
+		#print("Perform left check bottom-up (look-up-and-put-left) for each in a row...")
 		for i in range(BigMatrixSize-1, -1,-1):
 			up = np.where(columnsC == i)
 			l = 0
@@ -230,11 +236,11 @@ def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
 					if(not BCMx[j][k]):
 						BCMx[j][k] = True
 						allDone = 0
-						#print "	BCMx (look-up-and-put-left) repairment made [row, column] [",j,",",k,"]"			
+						#print( "	BCMx (look-up-and-put-left) repairment made [row, column] [",j,",",k,"]")
 				l = l+1
 			rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(BCMx)	#to refresh changes
 			
-		#print "Perform right check up-bottom (look-right-and-put-down) for each in a column..."
+		#print("Perform right check up-bottom (look-right-and-put-down) for each in a column...")
 		for i in range(BigMatrixSize):	
 			right = np.where(rowsR == i)
 			l = 0
@@ -243,11 +249,10 @@ def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
 					if(not BCMx[j][k]):
 						BCMx[j][k] = True
 						allDone = 0
-						#print "	BCMx (look-right-and-put-down) repairment made [row, column] [",j,",",k,"]"			
+						#print( "	BCMx (look-right-and-put-down) repairment made [row, column] [",j,",",k,"]"	)
 				l = l+1				
 			rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(BCMx)	#to refresh changes
 		
-	#print "fullRedundancyBigCircuitMatrix counter:\t ", count
 	return BCMx
 
 def checkNofOnes(matrix):
@@ -356,6 +361,7 @@ def printer(results, stw0, generationNum, **kwargs):
   
   TODO: This method is to be replaced with python logger facility! It is really lame to print only to screen but not to file in the same way.
   """
+  stdoutstring = ""
   
   #Calculate time
   stw1 = time()		
@@ -365,103 +371,108 @@ def printer(results, stw0, generationNum, **kwargs):
   
   currentBestScore = results[0]
   
+  # Common output:
+  stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE::: " +str(currentBestScore) + " Time: "+str(s)+"h "+str(m) +"m " + str(s) + "s"
+  
   if kwargs['problem']=='scoreCirc_HighPass':
-    print "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE::: " +str(currentBestScore) + " Time: "+str(s)+"h "+str(m) +"m " + str(s) + "s"
     try:
-      print "\t - ripple:", results[1]['ripple']['nominal'], "dB"
-      print "\t - damping:", results[1]['damping_L']['nominal'], "dB"
-      print "\t - gain:", results[1]['gain']['nominal'], "dB"
-      print "\t - bw:", results[1]['bw_start']['nominal'], "Hz"
+      stdoutstring += "\n\t - ripple:"+ str(results[1]['ripple']['nominal']) + "dB"
+      stdoutstring += "\n\t - damping:"+ str(results[1]['damping_L']['nominal'])+ "dB"
+      stdoutstring += "\n\t - gain:"+ str(results[1]['gain']['nominal']) + "dB"
+      stdoutstring += "\n\t - bw:"+ str(results[1]['bw_start']['nominal']) + "Hz"
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "   
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "   
       
   
   if kwargs['problem']=='scoreCirc_PassiveBandPass':
-    print "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - ripple:", results[1]['ripple']['nominal'], "dB"
-      print "\t - damping:", results[1]['damping_L']['nominal'], results[1]['damping_H']['nominal'], "dB"
-      print "\t - gain:", results[1]['gain']['nominal'], "dB"
-      print "\t - bw:", results[1]['bw_start']['nominal'], results[1]['bw_stop']['nominal'], "Hz"
+      stdoutstring += "\n\t - ripple:"+ str(results[1]['ripple']['nominal'])+ "dB"
+      stdoutstring += "\n\t - damping:"+ str(results[1]['damping_L']['nominal'])+" " +str(results[1]['damping_H']['nominal'])+ "dB"
+      stdoutstring += "\n\t - gain:"+ str(results[1]['gain']['nominal'])+ "dB"
+      stdoutstring += "\n\t - bw:"+ str(results[1]['bw_start']['nominal'])+ " " + str( results[1]['bw_stop']['nominal'])+ "Hz"
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "   
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "   
   
 
   if kwargs['problem']=='scoreCirc_PassiveFilter_2':
-    print "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - ripple:", results[1]['ripple']['nominal'], "dB"
-      print "\t - damping:", results[1]['damping']['nominal'], "dB"
-      print "\t - gain:", results[1]['gain']['nominal'], "dB"
-      print "\t - bw:", results[1]['bw']['nominal'], "Hz"
-      print "\t - Max slope:", results[1]['dumpingSlope']['nominal'], "dB" 
+      stdoutstring += "\n\t - ripple:"+ str(results[1]['ripple']['nominal']) + "dB"
+      stdoutstring += "\n\t - damping:"+ str(results[1]['damping']['nominal']) + "dB"
+      stdoutstring += "\n\t - gain:"+ str(results[1]['gain']['nominal']) + "dB"
+      stdoutstring += "\n\t - bw:"+ str(results[1]['bw']['nominal']) + "Hz"
+      stdoutstring += "\n\t - Max slope:"+ str(results[1]['dumpingSlope']['nominal']) + "dB" 
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - " 
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - " 
 
 
 
   if kwargs['problem']=='scoreCirc_ActiveFilter_3' or kwargs['problem']=='scoreCirc_ActiveFilter_2':
-    print "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - ripple:", results[1]['ripple']['nominal'], "dB"
-      print "\t - damping:", results[1]['damping']['nominal'], "dB"
-      print "\t - gain:", results[1]['gain']['nominal'], "dB"
-      print "\t - bw:", results[1]['bw']['nominal'], "Hz"
-      print "\t - THD_Lf:", results[1]['THD_Lf']['nominal'], "%"
-      print "\t - THD_Hf:", results[1]['THD_Hf']['nominal'], "%"
-      #print "\t - Rin:", results[1]['rin_meas']['nominal'], "Ohm"
-      print "\t - Gain diff 0-end:", results[1]['is_LP']['nominal'], "V/V"
-      print "\t - Max slope @freq:", results[1]['maxDampingSlope']['nominal'], "dB@Hz" 
-      print "\t - Max input imped:", results[1]['inimped']['nominal'], "Ohm"
-      print "\t - Max output imped:", results[1]['outimped']['nominal'], "Ohm"      
+      stdoutstring += "\n\t - ripple:"+ str(results[1]['ripple']['nominal'])+ "dB"
+      stdoutstring += "\n\t - damping:"+ str(results[1]['damping']['nominal'])+ "dB"
+      stdoutstring += "\n\t - gain:"+ str(results[1]['gain']['nominal'])+ "dB"
+      stdoutstring += "\n\t - bw:"+ str(results[1]['bw']['nominal'])+ "Hz"
+      stdoutstring += "\n\t - THD_Lf:"+ str(results[1]['THD_Lf']['nominal'])+ "%"
+      stdoutstring += "\n\t - THD_Hf:"+ str(results[1]['THD_Hf']['nominal'])+ "%"
+      #stdoutstring += "\n\t - Rin:"+ results[1]['rin_meas']['nominal']+ "Ohm"
+      stdoutstring += "\n\t - Gain diff 0-end:"+ str(results[1]['is_LP']['nominal'])+ "V/V"
+      stdoutstring += "\n\t - Max slope @freq:"+ str(results[1]['maxDampingSlope']['nominal'])+ "dB@Hz" 
+      stdoutstring += "\n\t - Max input imped:"+ str(results[1]['inimped']['nominal'])+ "Ohm"
+      stdoutstring += "\n\t - Max output imped:"+ str(results[1]['outimped']['nominal'])+ "Ohm"      
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - " 
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - " 
  
  
   if kwargs['problem']=='scoreCirc_PassiveFilter':
-    print "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - ripple:", results[1]['ripple']['nominal'], "dB"
-      print "\t - damping:", results[1]['damping']['nominal'], "dB"
-      print "\t - gain:", results[1]['gain']['nominal'], "dB"
-      #print "\t - THD:", Winnerresults[1]['THD']['nominal'], "%"  
+      stdoutstring += "\n\t - ripple:"+ str(results[1]['ripple']['nominal']) + "dB"
+      stdoutstring += "\n\t - damping:"+ str(results[1]['damping']['nominal']) + "dB"
+      stdoutstring += "\n\t - gain:"+ str(results[1]['gain']['nominal']) + "dB"
+      #stdoutstring += "\n\t - THD:"+ Winnerresults[1]['THD']['nominal']+ "%"  
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
   
   if kwargs['problem']=='scoreCirc_VoltageReference':
-    print "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - vdd_sweep:", np.median(results[1]['vout_vdd']['nominal']), "V"
-      print "\t - rload_sweep:", np.median(results[1]['vout_rload']['nominal']), "V"
-      print "\t - temp_sweep:", np.median(results[1]['vout_temp']['nominal']), "V"
-      print "\t - power@100Ohm:", results[1]['power']['nominal'], "W"   
+      stdoutstring += "\n\t - vdd_sweep:"+ str(np.median(results[1]['vout_vdd']['nominal']))+ "V"
+      stdoutstring += "\n\t - rload_sweep:"+ str(np.median(results[1]['vout_rload']['nominal']))+ "V"
+      stdoutstring += "\n\t - temp_sweep:"+ str(np.median(results[1]['vout_temp']['nominal']))+ "V"
+      stdoutstring += "\n\t - power@100Ohm:"+ str(results[1]['power']['nominal'])+ "W"   
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
     
   if kwargs['problem']=='scoreCirc_CmosVoltageReference_2':
-    print "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore, int(h), int(m), s)
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %s ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:
-      print "\t - vdd_sweep at 3 loads:", 
-      print np.median(results[1]['vout_vdd_res1']['nominal']),
-      print np.median(results[1]['vout_vdd_res2']['nominal']),
-      print np.median(results[1]['vout_vdd_res3']['nominal']), "V"
+      stdoutstring += "\n\t - vdd_sweep at 3 loads:"
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_res1']['nominal']))
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_res2']['nominal'])),
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_res3']['nominal']))+ "V"
       
-      print "\t - vdd_sweep at 3 temps:", 
-      print np.median(results[1]['vout_vdd_temp1']['nominal']),
-      print np.median(results[1]['vout_vdd_temp2']['nominal']),
-      print np.median(results[1]['vout_vdd_temp3']['nominal']), "V"
+      stdoutstring += "\n"+ "\t - vdd_sweep at 3 temps:"
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_temp1']['nominal'])),
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_temp2']['nominal'])),
+      stdoutstring += "\n"+ str(np.median(results[1]['vout_vdd_temp3']['nominal']))+ "V"
 
-      print "\t - power@10MOhm:", results[1]['power']['nominal'], "W"
-      print "\t - PSRR@100Hz:", results[1]['psrr']['nominal'], "dB" 
-      print "\t - Vout@2.5Vvdd:", results[1]['VatLowVdd']['nominal'], "V" 
-      print "\t - VoutTsense@11Vvdd:", results[1]['tempSens']['nominal'], "V/oC"
+      stdoutstring += "\n"+ "\t - power@10MOhm:"+ str(results[1]['power']['nominal'])+ "W"
+      stdoutstring += "\n"+ "\t - PSRR@100Hz:"+ str(results[1]['psrr']['nominal'])+ "dB" 
+      stdoutstring += "\n"+ "\t - Vout@2.5Vvdd:"+ str(results[1]['VatLowVdd']['nominal'])+ "V" 
+      stdoutstring += "\n"+ "\t - VoutTsense@11Vvdd:"+ str(results[1]['tempSens']['nominal'])+ "V/oC"
 
     except:
-      print "No results to show."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+      stdoutstring += "\n"+ "No results to show."
+    stdoutstring += "\n"+ "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+    
+  print(stdoutstring)
