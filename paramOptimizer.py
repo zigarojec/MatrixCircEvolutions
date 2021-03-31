@@ -58,7 +58,7 @@ def optimiseCircuit(topology, values, maxIter):
       See circuitUnderOptimiser class.
       Here, the parameter optimization algorithm is run. 
   """
-  print "... optimising values ..."
+  print("... optimising values ...")
   problem = deepcopy(circuitUnderOptimiser(topology))
   initValues = copy(values)
   

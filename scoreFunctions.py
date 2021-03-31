@@ -45,7 +45,7 @@ def scoreCirc_ActiveFilter_2(circuit, gen, indi, MOEAMODE):#LGA+MOEA
   This function measures THD at low freq default, and at bw that is measured via evaluation function.  
   """  
   if debug > 2:
-    print "\t\tG_" + str(gen) + "_I_" + str(indi)
+    print("\t\tG_" + str(gen) + "_I_" + str(indi))
 
   #---------------------------------------------------------BigMatrix stuff, check short-circuits, matrix density, matrix identifier (obsolete)
   FullBigCircuitMatrix = circuit.fullRedundancyMatrix
@@ -118,12 +118,12 @@ def scoreCirc_ActiveFilter_2(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       slof = 0 
     else:
       if len(maxSlope)==2:
-	slo = 0 if maxSlope[0]>80 else 80-maxSlope[0]
-	slof = abs(np.log10(maxSlope[1])-np.log10(1000))
+        slo = 0 if maxSlope[0]>80 else 80-maxSlope[0]
+        slof = abs(np.log10(maxSlope[1])-np.log10(1000))
       else:
-	slo = 0
-	slof = 0
-	disfCount = disfCount + 1
+        slo = 0
+        slof = 0
+        disfCount = disfCount + 1
 	
     bandwidth = np.array(results['bw']['nominal'], dtype=float)
     results['THD_Hf'] = {}
@@ -139,11 +139,11 @@ def scoreCirc_ActiveFilter_2(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       results['THD_Hf'] = {}
       results['THD_Hf']['nominal'] = resultsHf['THD_Hf']['nominal']#------------------put the Hf result in results
       if np.isnan(THD_Hf):
-	disfCount = disfCount + 1
-	thd_hf = 0
+        disfCount = disfCount + 1
+        thd_hf = 0
       else:
-	thd_hf = THD_Hf-1 if THD_Hf > 1 else 0
-	      
+        thd_hf = THD_Hf-1 if THD_Hf > 1 else 0
+            
     StaticOut = not results['isOutVNonStationary']['nominal']
     
     
@@ -159,31 +159,31 @@ def scoreCirc_ActiveFilter_2(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       
     
     if debug > 2:      
-      print slo, r, bw, d, slof,  100*StaticOut, thd_lf, thd_hf, g
+      print(slo, r, bw, d, slof,  100*StaticOut, thd_lf, thd_hf, g)
     
     #----------------------------------------------------------Score function SINGLE-OBJECTIVE
     if MOEAMODE == 0:
       score =  5*slo + 10*r + d + g*10 + 20*(2*bw + slof) + 100*StaticOut + 10*(thd_lf + thd_hf) + 1e-3*(inimped + outimped)  #+abs(slof-bw)/100)#rin! #TODO: slof ima tezave!!! poglej zgoraj, zakometirano 
 
       if disfCount > 0:
-	score = 0 + np.exp(disfCount) * 1e3 + random.random()*10
+        score = 0 + np.exp(disfCount) * 1e3 + random.random()*10
       
     #----------------------------------------------------------Score function MULTI-OBJECTIVE
     else: #MOEAMODE == 1
       score = np.array([(d), r, (bw+slof)]) + (100*StaticOut + 10*(thd_lf + thd_hf) + 1*islp + g*10)  + 1e-3*(inimped + outimped) #+ slo#+abs(slof-bw)/100)#rin!
 
       if disfCount > 0:
-	score = (np.array([0,0,0])+np.exp(disfCount) * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
+        score = (np.array([0,0,0])+np.exp(disfCount) * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
       
       #print "score64", score
       if gen > 30:
-	for i in range(0, len(score)): #round to 5 decimal points
-	  score[i] = np.float16(score[i]) 
-	#print "score16", score
+        for i in range(0, len(score)): #round to 5 decimal points
+            score[i] = np.float16(score[i]) 
+        #print "score16", score
       score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
     #-------------------------------------------------------------------
     if debug > 2:    
-      print "\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score
+      print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
     
     filename = "g_" + str(gen) + "_i_" + str(indi) + "_subckt.cir"
     os.remove(filename) #cleanup current subcircuit
@@ -208,7 +208,7 @@ def scoreCirc_PassiveBandPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
   This function measures no THD beacuse of being passive circuit.  
   """  
   if debug > 2:
-    print "\t\tG_" + str(gen) + "_I_" + str(indi)
+    print("\t\tG_" + str(gen) + "_I_" + str(indi))
 
   #---------------------------------------------------------BigMatrix stuff, check short-circuits, matrix density, matrix identifier (obsolete)
   FullBigCircuitMatrix = circuit.fullRedundancyMatrix
@@ -275,31 +275,31 @@ def scoreCirc_PassiveBandPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       
 
     if debug > 2:      
-      print r, dL, dH, g, bwL, bwH
+      print(r, dL, dH, g, bwL, bwH)
     
     #----------------------------------------------------------Score function SINGLE-OBJECTIVE
     if MOEAMODE == 0:
       score =  1*r + (dH + dL) + 100*(bwL + bwH) + g*10
 
       if disfCount > 0:
-	score += np.exp(disfCount) * 1e3 + random.random()*10
+        score += np.exp(disfCount) * 1e3 + random.random()*10
       
     #----------------------------------------------------------Score function MULTI-OBJECTIVE
     else: #MOEAMODE == 1
       score = np.array([(bwL + bwH), r, (dH + dL)]) + 10*g
 
       if disfCount > 0:
-	score += (np.array([0,0,0])+ disfCount * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
+        score += (np.array([0,0,0])+ disfCount * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
       
       #print "score64", score
       if gen > 30:
-	for i in range(0, len(score)): #round to 5 decimal points
-	  score[i] = np.float16(score[i]) 
-	#print "score16", score
+        for i in range(0, len(score)): #round to 5 decimal points
+            score[i] = np.float16(score[i]) 
+        #print "score16", score
       score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
     #-------------------------------------------------------------------
     if debug > 2:    
-      print "\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score
+      print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
     
     filename = "g_" + str(gen) + "_i_" + str(indi) + "_subckt.cir"
     os.remove(filename) #cleanup current subcircuit
@@ -323,7 +323,7 @@ def scoreCirc_HighPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
   This function measures no THD beacuse of being passive circuit.  
   """  
   if debug > 2:
-    print "\t\tG_" + str(gen) + "_I_" + str(indi)
+    print("\t\tG_" + str(gen) + "_I_" + str(indi))
 
   #---------------------------------------------------------BigMatrix stuff, check short-circuits, matrix density, matrix identifier (obsolete)
   FullBigCircuitMatrix = circuit.fullRedundancyMatrix
@@ -375,11 +375,11 @@ def scoreCirc_HighPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
     else:
       bwL = abs(np.log10(bandwidthL) - np.log10(abs(8000)))
       if bandwidthL < 200:
-	bwL = 1e6*(1/np.exp(bandwidthL/20))
+        bwL = 1e6*(1/np.exp(bandwidthL/20))
       
 
     if debug > 2:      
-      print r, dL, g, bwL
+      print(r, dL, g, bwL)
     
     #----------------------------------------------------------Score function SINGLE-OBJECTIVE
     if MOEAMODE == 0:
@@ -387,7 +387,7 @@ def scoreCirc_HighPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       score =  15*r + 10*(dL) + 5*(bwL) + 4*g
 
       if disfCount > 0:
-	score += np.exp(disfCount) * 1e3 + random.random()*10
+        score += np.exp(disfCount) * 1e3 + random.random()*10
 	
     #-EXPERIMENTAL---------------------------------------------Score function for PSADE
     # NO !!! NO GOOD!
@@ -395,24 +395,24 @@ def scoreCirc_HighPass(circuit, gen, indi, MOEAMODE):#LGA+MOEA
       score =  5*r + 3*(dL) + 200*(bwL) + 3*g
 
       if disfCount > 0:
-	score += np.exp(disfCount) * 1e3 + random.random()*10      
+        score += np.exp(disfCount) * 1e3 + random.random()*10      
       
     #----------------------------------------------------------Score function MULTI-OBJECTIVE
     elif MOEAMODE == 1:
       score = np.array([(bwL), r, (dL)]) + 10*g
 
       if disfCount > 0:
-	score += (np.array([0,0,0])+ disfCount * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
+        score += (np.array([0,0,0])+ disfCount * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
       
       #print "score64", score
       if gen > 30:
-	for i in range(0, len(score)): #round to 5 decimal points
-	  score[i] = np.float16(score[i]) 
-	#print "score16", score
+        for i in range(0, len(score)): #round to 5 decimal points
+            score[i] = np.float16(score[i]) 
+        #print "score16", score
       score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
     #-------------------------------------------------------------------
     if debug > 2:    
-      print "\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score
+      print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
     
     filename = "g_" + str(gen) + "_i_" + str(indi) + "_subckt.cir"
     os.remove(filename) #cleanup current subcircuit
@@ -424,7 +424,7 @@ def scoreCirc_CmosVoltageReference_2(circuit, gen, indi, MOEAMODE):
   """Calculates the score of the voltage reference circuit given in argument. """
   
   if debug > 2:
-    print "\t\tG_" + str(gen) + "_I_" + str(indi)
+    print("\t\tG_" + str(gen) + "_I_" + str(indi))
   #----------#
   VREF = 1.5
   #----------#
@@ -554,7 +554,7 @@ def scoreCirc_CmosVoltageReference_2(circuit, gen, indi, MOEAMODE):
 	      (100*powe)
       )
       if disfCount > 0:
-	score = 0 + np.exp(disfCount) * 1e3
+        score = 0 + np.exp(disfCount) * 1e3
 	
     #----------------------------------------------------------Score function MULTI-OBJECTIVE	
     else: #MOEAMODE == 1:
@@ -569,11 +569,11 @@ def scoreCirc_CmosVoltageReference_2(circuit, gen, indi, MOEAMODE):
 						+ (oP if oP > 1e-1 else 0)
       )
       if disfCount > 0:
-	score = (np.array([0,0,0])+np.exp(disfCount) * 1e3) + random.randint(0, 200)
+        score = (np.array([0,0,0])+np.exp(disfCount) * 1e3) + random.randint(0, 200)
 
     #-------------------------------------------------------------------
     if debug > 2:    
-      print "\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score
+      print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
 
     filename = "g_" + str(gen) + "_i_" + str(indi) + "_subckt.cir"
     #os.remove(filename) #cleanup current subcircuit
@@ -637,10 +637,10 @@ def scoreCirc_LP_PassiveFilter(circuit, gen, indi):
       
       bw = results['bw']['default']
       if bw == None:
-	disfCount = disfCount + 1
+        disfCount = disfCount + 1
       cutoff = results['cutoff']['default']
       if cutoff == None:
-	disfCount = disfCount + 1  
+        disfCount = disfCount + 1  
     else:
       disfCount = disfCount + 1
       score = 1e4
@@ -708,10 +708,10 @@ def scoreCirc_PassiveFilterOLDER(circuit, gen, indi):
       
       bw = results['bw']['default']
       if bw == None:
-	disfCount = disfCount + 1
+        disfCount = disfCount + 1
       cutoff = results['cutoff']['default']
       if cutoff == None:
-	disfCount = disfCount + 1  
+        disfCount = disfCount + 1  
     else:
       disfCount = disfCount + 1
       score = 1e4
@@ -798,10 +798,10 @@ def scoreCirc_PassiveFilterOLD(circuit, gen, indi, makeRedundancyInMatrix):
       
       #bw = results['bw']['default']
       #if bw == None:
-	#disfCount = disfCount + 1
+        #disfCount = disfCount + 1
       #cutoff = results['cutoff']['default']
       #if cutoff == None:
-	#disfCount = disfCount + 1  
+        #disfCount = disfCount + 1  
     else:
       disfCount = disfCount + 1
       score = 1e4
@@ -1018,7 +1018,7 @@ def scoreCirc_VoltageReference(circuit, gen, indi, makeRedundancyInMatrix):
       #check last scale value in runme2!!
       #print "tukiii", vdd_sweep_scale
       if (vdd_sweep_scale[-1]<20): #20V
-	badSweep = badSweep + 1
+        badSweep = badSweep + 1
      
     rload_sweep = np.array(results['vout_rload']['nominal'], dtype=float)
     rload_sweep_scale = np.array(results['vout_rload_scale']['nominal'], dtype=float)
@@ -1034,7 +1034,7 @@ def scoreCirc_VoltageReference(circuit, gen, indi, makeRedundancyInMatrix):
       #if sweep did not finish completely - add to score
       #check last scale value in runme2!!
       if (rload_sweep_scale[-1]<100e3): #100kOhm
-	badSweep = badSweep + 1
+        badSweep = badSweep + 1
       
     temp_sweep = np.array(results['vout_temp']['nominal'], dtype=float)
     temp_sweep_scale = np.array(results['vout_temp_scale']['nominal'], dtype=float)
@@ -1048,7 +1048,7 @@ def scoreCirc_VoltageReference(circuit, gen, indi, makeRedundancyInMatrix):
       temp_s =  abs(x - VREF) #if x > VREF else 0
       temp_s_d = np.max(temp_sweep) - np.min(temp_sweep)
       if (temp_sweep_scale[-1]<120): #120 deg celsius
-	badSweep = badSweep + 1
+        badSweep = badSweep + 1
       
     power = results['power']['nominal']
     if np.isnan(np.array(power, dtype=float)):
@@ -1298,12 +1298,12 @@ def scoreCirc_ActiveFilter_3(circuit, gen, indi, makeRedundancyInMatrix):
       slof = 0 
     else:
       if len(maxSlope)==2:
-	slo = 0 if maxSlope[0]>60 else 60-maxSlope[0]
-	slof = np.log10(abs(maxSlope[1]-1000))
+        slo = 0 if maxSlope[0]>60 else 60-maxSlope[0]
+        slof = np.log10(abs(maxSlope[1]-1000))
       else:
-	slo = 0
-	slof = 0
-	disfCount = disfCount + 1    
+        slo = 0
+        slof = 0
+        disfCount = disfCount + 1    
     
     
     bandwidth = np.array(results['bw']['nominal'], dtype=float)
@@ -1323,7 +1323,7 @@ def scoreCirc_ActiveFilter_3(circuit, gen, indi, makeRedundancyInMatrix):
     #score = score + (IcNc+1)# + abs(BW-bw)*1e2 + abs(CUTOFF-cutoff)*1e2 #add small punishment if not all nodes connected and bw and cutoff are off
 
       
-    print "\t\t\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score
+    print("\t\t\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
     #cleanup current subcircuit
     filename = "g_" + str(gen) + "_i_" + str(indi) + "_subckt.cir"
     os.remove(filename)

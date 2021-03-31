@@ -726,7 +726,7 @@ def evaluatePassiveFilter(generation, individual):
 	return results
 
 def evaluateDiffStage(generation, individual):
-	print "GEN-%s-IND-%s's evaluation started..." %(generation, individual)
+	#print "GEN-%s-IND-%s's evaluation started..." %(generation, individual)
 	heads = {
 		'opus': {
 			'simulator': 'SpiceOpus', 
@@ -882,8 +882,8 @@ def evaluateDiffStage(generation, individual):
 	pyopl.join()
 	"""
 	pe.finalize()
-	print "GEN-%s-IND-%s's evaluation finished." %(generation, individual)
-	print
+	print("GEN-%s-IND-%s's evaluation finished." %(generation, individual))
+	print()
 	return results
 	
 
