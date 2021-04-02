@@ -16,6 +16,17 @@ import numpy as np
 # This array contains the set of circuit nodes, that are accessible to the outer world. 
 outerConns = ['gnd','vcc','vout']
 
+"""
+    {	#Simple resistor
+'SpiceElementType': 'r',	      # How this element is encoded (initiated) in Spice netlist  
+'Element': 'Rs',               # How do we name it
+'Quantity': 2, #<---NOTE       # How many devices
+'NofPins':  2,                 # How manz terminals
+'Model': '',                   # Name of the model(s)
+'ParamTypes': {'r':'r'},       # Dictionary of parameter names vs. parameter types
+    },    
+"""
+
 
 #NOTE: Set Quantity, do not touch others.
 buildBlocks =  [
@@ -25,7 +36,7 @@ buildBlocks =  [
 	'Quantity': 2, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
-	'ParamTypes': ['r'],
+	'ParamTypes': {'r':'r'},
 	  },
       {	#Simple capacitor
 	'SpiceElementType': 'c',	
@@ -33,7 +44,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': '',
-	'ParamTypes': ['c'],
+	'ParamTypes': {'c':'c'},
 	  },
       {	#Simple inductor
 	'SpiceElementType': 'l',
@@ -41,7 +52,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': '',
-	'ParamTypes': ['l'],
+	'ParamTypes': {'l':'l'},
 	  },
       {	#Zener diode
 	'SpiceElementType': 'd',
@@ -49,7 +60,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': 'zd4v7',
-	'ParamTypes': [],
+	'ParamTypes': {},
 	  },
       {	#NPN BJ Transistor
 	'SpiceElementType': 'q',
@@ -57,7 +68,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'bc238b',
-	'ParamTypes': [],     
+	'ParamTypes': {},     
 	  },
       {	#Subcircuit with three parallel PNPs
 	'SpiceElementType': 'x',
@@ -65,7 +76,7 @@ buildBlocks =  [
 	'Quantity': 2,#<---NOTE
 	'NofPins':  3,
 	'Model': 'par3pnp',
-	'ParamTypes': [],     
+	'ParamTypes': {},     
 	  },
       {	#PNP BJ Transistor
 	'SpiceElementType': 'q',
@@ -73,7 +84,7 @@ buildBlocks =  [
 	'Quantity': 1,#<---NOTE
 	'NofPins':  3,
 	'Model': 'BC308B',
-	'ParamTypes': [],
+	'ParamTypes': {},
 	  },
       {	#NMos transistor
 	'SpiceElementType': 'x',
@@ -81,7 +92,7 @@ buildBlocks =  [
 	'Quantity': 4,#<---NOTE
 	'NofPins':  3,
 	'Model': 'submodn',
-	'ParamTypes': ['mos_w', 'mos_l'],
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},
 	  },
       {	#PMos transistor
 	'SpiceElementType': 'x',
@@ -89,7 +100,7 @@ buildBlocks =  [
 	'Quantity': 6,#<---NOTE
 	'NofPins':  3,
 	'Model': 'submodp',
-	'ParamTypes': ['mos_w', 'mos_l'],
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},
 	  },
       
       {	#Opamp
@@ -98,7 +109,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'LM348T_plus',
-	'ParamTypes': [],
+	'ParamTypes': {},
 	  },
       {	#PMosCurrSrc1stg 				1.
 	'SpiceElementType': 'x',
@@ -106,7 +117,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'PMosCurrSrc1stg',
-	'ParamTypes': ['mos_w', 'mos_l'],     
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},    
 	  },
       {	#CascPMosCurrSrc1stg				2.
 	'SpiceElementType': 'x',
@@ -114,7 +125,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'CascPMosCurrSrc1stg',
-	'ParamTypes': ['mos_w', 'mos_l'],     
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},    
 	  },      
       {	#NMosAmp1ResOnSrc				3.
 	'SpiceElementType': 'x',
@@ -122,7 +133,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'NMosAmp1ResOnSrc',
-	'ParamTypes': ['mos_w', 'mos_l', 'r'],     
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l', 'r':'r'},     
 	  },   
       {	#BJTNPNCurrSink					4.
 	'SpiceElementType': 'x',
@@ -130,7 +141,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'BJTNPNCurrSink',
-	'ParamTypes': [],     
+	'ParamTypes': {},     
 	  },
       {	#BJTPNPCurrSrc					5.
 	'SpiceElementType': 'x',
@@ -138,7 +149,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'BJTPNPCurrSrc',
-	'ParamTypes': [],     
+	'ParamTypes': {},     
 	  }, 
       {	#NMosCurrMirr					6.
 	'SpiceElementType': 'x',
@@ -146,7 +157,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'NMosCurrMirr',
-	'ParamTypes': ['mos_w', 'mos_l'],     
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},     
 	  },
       {	#CascNMosCurrMirr				7.
 	'SpiceElementType': 'x',
@@ -154,7 +165,7 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'CascNMosCurrMirr',
-	'ParamTypes': ['mos_w', 'mos_l'],
+	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},
 	  },
       {	#PMosCurrSrc2Stg				8.
 	'SpiceElementType': 'x',
@@ -162,7 +173,11 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'PMosCurrSrc2Stg',
-	'ParamTypes': ['mos_w', 'mos_l', 'mos_w', 'mos_l'],     
+	'ParamTypes': {
+        'w1':'mos_w', 
+        'l1':'mos_l', 
+        'w2':'mos_w', 
+        'l2': 'mos_l'},     
 	  },
       {	#CascPMosCurrSrc2Stg				9.
 	'SpiceElementType': 'x',
@@ -170,7 +185,11 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'CascPMosCurrSrc2Stg',
-	'ParamTypes': ['mos_w', 'mos_l', 'mos_w', 'mos_l'],     
+	'ParamTypes': {
+        'w1':'mos_w', 
+        'l1':'mos_l', 
+        'w2':'mos_w', 
+        'l2': 'mos_l'},       
 	  },
       {	#PMosCascode					10.
 	'SpiceElementType': 'x',
@@ -178,7 +197,11 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'PMosCascode',
-	'ParamTypes': ['mos_w', 'mos_l', 'mos_w', 'mos_l'],     
+	'ParamTypes': {
+        'w1':'mos_w', 
+        'l1':'mos_l', 
+        'w2':'mos_w', 
+        'l2': 'mos_l'},     
 	  },      
       {	#NMosCascode					11.
 	'SpiceElementType': 'x',
@@ -186,7 +209,11 @@ buildBlocks =  [
 	'Quantity': 0,#<---NOTE
 	'NofPins':  4,
 	'Model': 'NMosCascode',
-	'ParamTypes': ['mos_w', 'mos_l', 'mos_w', 'mos_l'],     
+	'ParamTypes': {
+        'w1':'mos_w', 
+        'l1':'mos_l', 
+        'w2':'mos_w', 
+        'l2': 'mos_l'},     
 	  },  
 ]
 
