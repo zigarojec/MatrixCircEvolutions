@@ -128,8 +128,9 @@ def createRandomValueVector():
   randomValueVector = np.array([], dtype="float64")
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
-      for params in element['ParamTypes']:
-        randomValueVector = np.append(randomValueVector, random.uniform(paramBounds[params]['min'], paramBounds[params]['max']))
+      for paramName in element['ParamTypes']:
+        paramType = element['ParamTypes'][paramName]
+        randomValueVector = np.append(randomValueVector, random.uniform(paramBounds[paramType]['min'], paramBounds[paramType]['max']))
   return randomValueVector
 
 
@@ -138,8 +139,9 @@ def returnMaxValueVector():
   MaxValueVector = np.array([], dtype="float64")
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
-      for params in element['ParamTypes']:
-        MaxValueVector = np.append(MaxValueVector, paramBounds[params]['max'])
+      for paramName in element['ParamTypes']:
+        paramType = element['ParamTypes'][paramName]
+        MaxValueVector = np.append(MaxValueVector, paramBounds[paramType]['max'])
   return MaxValueVector
 
 def returnMinValueVector():
@@ -147,8 +149,9 @@ def returnMinValueVector():
   MinValueVector = np.array([], dtype="float64")
   for element in buildBlocks:
     for duplicates in range(0,element['Quantity']):
-      for params in element['ParamTypes']:
-        MinValueVector = np.append(MinValueVector, paramBounds[params]['min'])
+      for paramName in element['ParamTypes']:
+        paramType = element['ParamTypes'][paramName]
+        MinValueVector = np.append(MinValueVector, paramBounds[paramType]['min'])
   return MinValueVector
 
 
