@@ -70,6 +70,16 @@ buildBlocks =  [
 	'Model': 'bc238b',
 	'ParamTypes': {},     
 	  },
+      
+      {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
+	'SpiceElementType': 'q',
+	'Element':'NPNs',
+	'Quantity': 2,#<---NOTE
+	'NofPins':  3,
+	'Model': ['bc238b',  'bc238b_sc', 'bc238b_himp'],
+	'ParamTypes': {},     
+	  },
+      
       {	#Subcircuit with three parallel PNPs
 	'SpiceElementType': 'x',
 	'Element':'3PNPs',
@@ -216,6 +226,11 @@ buildBlocks =  [
         'l2': 'mos_l'},     
 	  },  
 ]
+    
+    
+    
+
+    
 
 paramBounds = {
   'r':{'min': 1e3,#Spremenjeno 6.9.2017
@@ -283,3 +298,28 @@ for element in buildBlocks:
     Nof3poles += element['Quantity']
   if element['NofPins'] == 4:
     Nof4poles += element['Quantity']
+
+
+
+# Model netlist scheme
+def returnModelScheme():
+    """
+    This function builds and returns a Python dictionary of models available for each device. The ModelScheme is ised to iterate over the various models for the same device in robust scoreCircuit evaluation procedure. 
+    
+    Place this function in e.g. utils.py. 
+    Call it within somewhere else (e.g. main.py). 
+    """
+    
+    modelScheme = dict()
+    for buildingBlockTypeNo, buildingBlockType in enumerate(buildBlocks):
+        for buildingBlockNo in range(1, buildingBlockType['Quantity']+1):   # Count, not index.
+            #print(buildingBlockTypeNo, buildingBlockNo, buildingBlockType )
+    
+            if isinstance(buildingBlockType['Model'], list):
+                #print(buildingBlockType['Model'])
+                elementName = buildingBlockType['Element'] + '_' + str(buildingBlockNo)
+                modelScheme[elementName] = buildingBlockType['Model']
+    
+    return modelScheme
+    
+MODELSCHEME = returnModelScheme()   # Make modelScheme a global var. 
