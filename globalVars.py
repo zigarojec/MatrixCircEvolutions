@@ -13,13 +13,14 @@ import numpy as np
 from buildingBlocksBank import buildBlocks, paramBounds
 
 #Define the cost function--------------------------
-PROBLEMname = 'scoreCirc_CmosVoltageReference_2'
+PROBLEMname = 'scoreCirc_commonEmitterAmp_resilenceMode'
 #---------------------------------------------------
 #Problem names available:
 # scoreCirc_ActiveFilter_2
 # scoreCirc_CmosVoltageReference_2
 # scoreCirc_PassiveBandPass
 # scoreCirc_HighPass
+# scoreCirc_commonEmitterAmp_resilenceMode
 
 seedN = 0		#random seed
 continuee = 	0	#to continue the algorithm from the last run

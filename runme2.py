@@ -215,8 +215,7 @@ def evaluateVoltageRef(generation, individual):
 		'vdd_sweep': {
 			'head': 'opus',
 			'modules': [ 'def', 'tb' ], 
-			'params': {'rl':10e3
-			}, 
+			'params': {'rl':10e3}, 
 			'saves': [ ], 
 			#'command': "dc(3, 20.0, 'lin', 100, 'vdd', 'dc')" #if stop point changed, change also in reproduction cost function. 
 			'command': "dc(3, 20, 'lin', 100, 'vdd', 'dc')" #if stop point changed, change also in reproduction cost function. 
@@ -2027,3 +2026,101 @@ __result = VatVdd
 	pe.finalize()  
 	
 	return results
+
+
+
+
+# ROBUST CIRCUIT EVOLUTION
+
+def evaluate_CommonEmitterAmp(filename):
+    """Evaluation script for pyopus. It evaluates performance of an voltage reference. """    
+    heads={
+        'opus': {
+            'simulator' : 'SpiceOpus',
+            'moddefs': {
+                #'def':     { 'file': '/spice/commonemitter/g_' + str(generation) + '_i_' + str(individual) + '_subckt.cir' },
+                'def':     { 'file': '/spice/commonemitter/' + str(filename) },
+                'tb':      { 'file': '/spice/commonemitter/topdc_robust_commonemitter.cir'},#'testTopCircuit_hspice.cir' }, 
+                'models':   {'file': '/spice/commonemitter/models_for_start.inc'}
+                }, 
+            'settings':{
+                'debug': 0
+                    },
+            'params':{
+                'temperature': 25,
+                'iref': 50e-6
+                    },
+            'options': {
+                'method': 'trap', 
+                'noautoconv': True,		#prevent Spice to try to converge for every price
+                    }
+            }
+        }
+    analyses={
+        'op': {
+            'head': 'opus', 
+            'modules': [ 'def', 'tb', 'models' ], 
+            'params': {'rl':1000e3}, 
+            'command': "op()"
+        }, 
+        'dc_sweep_tf': {
+            'head': 'opus',
+            'modules': [ 'def', 'tb', 'models' ], 
+            'params': {'rl':1000e3}, 
+            'saves': [ ],  
+            'command': "dc(-100e-6, 100e-6, 'lin', 100, 'iin', 'dc')" #if stop point changed, change also in reproduction cost function. 
+            },            
+        }
+            
+    measures={
+        'DCgain' : {
+            'analysis' : 'dc_sweep_tf',
+            'corners' : [ 'nominal' ],
+            'expression': 'm.DCgain(v("vout"), scale())',
+            'vector' : False,
+        },         
+        'dcvout_rmse' : {
+            'analysis' : 'dc_sweep_tf',
+            'corners' : [ 'nominal' ],
+            'script': """
+targets = 4.8e3*scale() + 0.66 #linear gain of 4.8kV/A with offset 0.66
+outputs = v("vout")
+__result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
+""",
+            'vector' : False,
+        },           
+        'maxpower':{
+            'analysis' : 'dc_sweep_tf',
+            'corners' : [ 'nominal' ],
+            'expression': '(-v("vdd")*i("vdd")).max()',
+            'vector' : False
+        },
+        # Normalised gain standard deviation (checking if gain is a constant...!)
+        # given in percent. 
+        'gain_stddev_norm':{    
+            'analysis' : 'dc_sweep_tf',
+            'corners' : [ 'nominal' ],
+            'expression': """
+deriv = m.dYdX(v("vout"), scale())
+maxderiv = deriv.max()
+__result = (np.std(deriv, dtype="float64")/maxderiv)*100 # norm the std deviation with maximum gain
+""",
+            'vector' : True 
+            }
+        }
+    corners = {
+        'nominal': {
+            'heads': [ 'opus' ], 
+            'modules': [ ],            # modules must be added in corners now!
+            'params': {
+                'temperature': 25, 
+                'vcc': 15, 
+                }
+            }
+        }		
+    pe=PerformanceEvaluator(heads, analyses, measures, corners, debug=0)
+
+    results,ancount=pe()
+    pe.finalize()  
+    
+    return results

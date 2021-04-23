@@ -25,6 +25,7 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    'scoreCirc_PassiveBandPass':scoreCirc_PassiveBandPass,
 	    'scoreCirc_HighPass':scoreCirc_HighPass,
+        'scoreCirc_commonEmitterAmp_resilenceMode':scoreCirc_commonEmitterAmp_resilenceMode,
 	    } #set this also in main
 PROBLEM = problems[PROBLEMname]
 

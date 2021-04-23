@@ -39,6 +39,7 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    'scoreCirc_PassiveBandPass':scoreCirc_PassiveBandPass,
 	    'scoreCirc_HighPass':scoreCirc_HighPass,
+	    'scoreCirc_commonEmitterAmp_resilenceMode':scoreCirc_commonEmitterAmp_resilenceMode,
 	    } #set this also in paramOptimizer
 
 
@@ -49,8 +50,7 @@ if __name__=='__main__':
   #---------------------------------------------------
   t0 = time()
   print()
-  print("++++++++++++++++++++++++++++++++++++++++++++")
-  print( "+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n")
+  print("+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n")
 
   ###MINI EVOLUTION CYCLE	
   startdate = strftime("%Y_%m_%d")
@@ -95,7 +95,7 @@ if __name__=='__main__':
       data = pickle.load(pkl_file)
     pkl_file.close()
     
-    print("Ressurecting old population. Press any to proceed...")
+    print("Ressurecting old population...")
     generation = data[0]
     generationNum = 0#data[1]
     bestScoresList = data[2]
@@ -110,16 +110,19 @@ if __name__=='__main__':
     
     input("...old population resurrected.")
   else:
-    print("Creating initial population. Press any to proceed...")
+    print("Creating initial population...")
     
     NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,POP_SIZE)), remote=True)
     for i in range(0,POP_SIZE):
-      hotGen.add_individual(NEWindividuals[i])
+        NEWindividuals[i].generationNum = generationNum
+        NEWindividuals[i].individualNum = i
+        hotGen.add_individual(NEWindividuals[i])
     
     if insertAdam:
       #hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
       #hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
       print("Adam-circuit NOT inserted into population.")
+      # Ubder construction. Read from adam_dict netlist!
     input("...initial population created.")
     
   
@@ -172,7 +175,10 @@ if __name__=='__main__':
     #dispach creating of full redundance in circuit matrices
     individuals = cOS.dispatch(jobList=((dispatchCircuitObjectGeneration, [tempPool.pool[i], i]) for i in range(0,len(tempPool.pool))), remote=True)
     for i in range(0,len(tempPool.pool)):
-      tempPool.pool[i] = individuals[i]
+        # WATCH Here add gennum ind num to individual object
+        individuals[i].generationNum = generationNum
+        individuals[i].individualNum = i
+        tempPool.pool[i] = individuals[i]
    
     #remove duplicated individuals created during evolution----------------
     #Warning. When optimizing ValueVector, duplicates are not among circuits with same topology!
@@ -315,4 +321,3 @@ if __name__=='__main__':
   
   cOS.finalize()
   print("\n+++	 MATRIX EVOLUTIONS ENDED	+++")
-  print("+++++++++++++++++++++++++++++++++++++++++++")

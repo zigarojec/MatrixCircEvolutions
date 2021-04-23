@@ -38,7 +38,7 @@ class circuit:
 
         self.generationNum = None    # TEST!
         self.individualNum = None    # TEST!
-
+        
         rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(self.BigCircuitMatrix)
         self.matrixDensity = float(len(rowsR))/float((BigMatrixSize*BigMatrixSize/2))	#(ones/(all/2))
         self.reduMtrxHash = hash(self.fullRedundancyMatrix.tostring())
@@ -56,12 +56,18 @@ class circuit:
         self.crow_dist = None
         #----ALPS
         self.age = None
+    
     @property
     def scoreHash(self):
         return hash(np.array(self.objectivesScore).tostring())
+    @property
+    def filename(self):
+        return str(self.PROBLEMname) + "_g_" + str(self.generationNum) + "_i_" + str(self.individualNum) + "_subckt.cir"
 
 def createRandomBigCircuitMatrix(ValueVector):
-	"""Creates a random BigCircuitMatrix, with random connection in each row. Takes an individual as an argument from which it gets ValueMatrix."""
+	"""Creates a random BigCircuitMatrix, with random connection in each row. Takes an individual as an argument from which it gets ValueMatrix.
+	It returns a circuit object. That has to be changed in future because it is not consistent. 
+	"""
 	ind1_MX = emptyBigMatrix()	
 	OutConns_gene_1 = np.zeros([NofOutConns,BigMatrixSize-NofOutConns], dtype=bool)
 	InterConns_gene_1 = np.zeros([BigMatrixSize-NofOutConns, BigMatrixSize-NofOutConns], dtype=bool)
@@ -288,11 +294,7 @@ def checkConnsConnected(BigCircuitMatrix):
   selfConnected = 0
   for i in range(0, Nof2poles, 2):
     selfConnected = selfConnected+InnerConns[i,i+1]
-    
-  #--TEST- OPAMP LINEAR REGION -Check whether an element is inserted between + and - nodes of opamp
-  #TODO
-  #Bad idea. Instead, mesaure THD. DONE.
-  
+
   
   return max(suma), nonConnected, selfConnected
 
@@ -344,7 +346,7 @@ def minmaxMeas(sig, scl, start, stop):#obsolete?
 
 
 
-def netlist_parser():
+def adam_netlist_parser():
   """
   This parser should read the adam.cir netlist and build connection matrix from if. TODO 
   """

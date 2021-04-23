@@ -13,7 +13,7 @@ import collections
 import pyopus.evaluator.measure as pyo
 
 from globalVars import *
-import AdamAndEve as AE
+#import AdamAndEve as AE
 import buildingBlocksBank as bBB
 
 
@@ -637,12 +637,28 @@ def mutationREMOVEnode(ind1):
 
 
 
-def makeNetlist_netlister(circuit): #, generationNum, individualNum
+def makeNetlist_netlister(circuit, **kwargs): #, generationNum, individualNum
     """
     This is a simplified version of makeNetlist function which depends on buildingBlocksBank as an input for netlist building. 
-    This netlister 
+    This netlister
     TODO
+    
+    Keywords:
+        Element="3PNPs" #e.g.
+        ElementNo = 2      #e.g.
+        ModelName= "somecoolrobustmodel"
     """
+    if len(kwargs) != 0:    # If kwargs are present check their names.
+                            # kwargs are used to locate particular elements and set their models/antimodels/failuremodels... 
+        for key, value in kwargs.items():
+            print ("%s == %s" %(key, value)) 
+        if not (('Element' in kwargs) and
+                ('ElementNo' in kwargs) and 
+                ('ModelName' in kwargs)):
+            raise Exception("Netlister warning. Netlister is being used with uncommon kwargs. Exiting!") 
+            # Maybe todo: check if model and element are even in modelScheme...
+    
+    
     BigCircuitMatrix = circuit.BigCircuitMatrix
     ValueVector = circuit.ValueVector
     HOTCIRC = "HOT_CIRCUIT"		#Name of the current netlist
@@ -665,12 +681,12 @@ def makeNetlist_netlister(circuit): #, generationNum, individualNum
         if i > (bBB.BigMatrixSize-1-bBB.NofOutConns):
             OutConnsBank[i] = nodesBank[i]  
             
-    #TODO add nodesBank to the circuit object!
+    #TODO (mid) add nodesBank to the circuit object!
 
     #Open empty file for netlist
-    ID = str(circuit.PROBLEMname) + "_g_" + str(circuit.generationNum) + "_i_" + str(circuit.individualNum)
-    netlistName = ID + "_subckt.cir"
-    circ = open(netlistName, "w")
+    
+    netlistName = circuit.filename
+    circ = open(netlistName, "w") 
     circ.write("*%s \n" %netlistName)
     
     # Write first line of subcircuit
@@ -691,7 +707,7 @@ def makeNetlist_netlister(circuit): #, generationNum, individualNum
     
     for buildingBlockTypeNo, buildingBlockType in enumerate(bBB.buildBlocks):
         for buildingBlockNo in range(1, buildingBlockType['Quantity']+1):   # Count, not index.
-            #print("Writing buildingBlock ",buildingBlockType['Element'] , buildingBlockTypeNo, "->",  buildingBlockNo)
+            print("Writing buildingBlock ",buildingBlockType['Element'] , buildingBlockTypeNo, "->",  buildingBlockNo)
             
             # Place all nodes of the element in an array. 
             # Use the set() method to convert the list into a set. Now, if all the elements in the list are equal, the set will contain only one element. This means that element terminals are connected to each other (element not used).
@@ -709,16 +725,25 @@ def makeNetlist_netlister(circuit): #, generationNum, individualNum
                 circ.write("%s "  %node)
             circ.write(")")
 
-            if len(buildingBlockType['Model'])>0:
-                # Pisi model
-                # If multiple Models available we should have a mechanism to choose which to use in this netlist.
+
+            MODELNAME = "" # Set model name following those rules. 
+            
+            if isinstance(buildingBlockType['Model'], list):    # Assume the use of the nominal model. 
+                MODELNAME = buildingBlockType['Model'][0]
+            else:
+                MODELNAME = buildingBlockType['Model']
                 
-                circ.write(" %s " %buildingBlockType['Model']) # For now only FIRST model found. 
+            if(len(kwargs)):
+                if (buildingBlockType['Element'] == kwargs['Element'] and # If the iterated element is targeted by kwargs, listen to them. 
+                    buildingBlockNo == kwargs['ElementNo']):
+                    
+                    MODELNAME = kwargs['ModelName'] # Insert the manual model name for this device.
+                    # Usually this would be the model from ModelScheme (list of available models/antimodels for the device)      
+            circ.write(" %s " %MODELNAME)   # Finally, write the modelname down. 
                 
             
             if len(buildingBlockType['ParamTypes'])>0:
                 # Pisi parametre
-                # TODO Parameters should match the name, not the type. (Extra field in bBB?) 
                 for param in buildingBlockType['ParamTypes']:
                     circ.write(" %s = %s " %(param, ValueVector[value_index]))
                     value_index += 1
