@@ -22,7 +22,7 @@ from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
 
 #My modules
 from globalVars import *
-#import AdamAndEve as AE
+import AdamAndEve as AE #old adam style...
 import adam_dict #The new Adam
 from reproduction import *
 from scoreFunctions import *
@@ -70,13 +70,9 @@ if __name__=='__main__':
 
   # Set up MPI for parallel computing
   cOS.setVM(MPI(mirrorMap={
-    'models.inc':'.', 
-    'topdc.cir':'.',
-    'mosmm.inc':'.',
-    'topdc_psrr.cir':'.',
-    'cmos180n.lib':'.',
-    #'testTopCirc_hspice_AF.cir':'.', 
-    #'testTopCirc_hspice_AF_outimped.cir':'.'
+      #TODO set models in home folder for MPI. Fix that...
+    #'models_for_start.inc':'.', 
+    #'topdc_robust_commonemitter.cir':'.', 
   }))
   
   generationNum = 0
@@ -90,8 +86,12 @@ if __name__=='__main__':
   bestScoresList = []
   averageScoresList = []
   
+  
+  if os.path.exists("./STOP"):
+      input("Warning: A STOP file exists in this directory. Evolution will only last for 1 gen. You can remove the STOP file now. Press key when ready.")
+  
   if continuee:
-    with open("backdata.pkl","r") as pkl_file:
+    with open("backdata.pkl","rb") as pkl_file: # Changed to rb to load pickle correctly
       data = pickle.load(pkl_file)
     pkl_file.close()
     
@@ -119,9 +119,9 @@ if __name__=='__main__':
         hotGen.add_individual(NEWindividuals[i])
     
     if insertAdam:
-      #hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
-      #hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
-      print("Adam-circuit NOT inserted into population.")
+      hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
+      hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
+      print("Adam-circuit inserted into population.")
       # Ubder construction. Read from adam_dict netlist!
     input("...initial population created.")
     
@@ -165,9 +165,9 @@ if __name__=='__main__':
     matingPool, mP_SortedIndices = tournament(oldGen, NofElite, tournamentSize, POP_SIZE, sortedPool_Indices)
     
     tempPool = population()
-    for i in range(0, len(mP_SortedIndices)/2):
+    for i in range(0, len(mP_SortedIndices)//2):
       parent1 = matingPool.pool[i]
-      parent2 = matingPool.pool[random.randint(len(mP_SortedIndices)/2,len(mP_SortedIndices)-1)]
+      parent2 = matingPool.pool[random.randint(len(mP_SortedIndices)//2,len(mP_SortedIndices)-1)]
       family = geneticOperation(parent1, parent2, generationNum)
       for j in range(0, len(family.pool)):
         tempPool.add_individual(family.pool[j])
@@ -284,21 +284,24 @@ if __name__=='__main__':
     #if int(currentBestScore) > int(min(bestScoresList)): #Jao dzubre kaj si blesav!
     #  print "Something went wrong BADLY."
     #  print bestScoresList
-    #  input()
+    # input()
     
     #---Saving results, picle, ...  and so on----#
 
     #Evaluate best one together with results for plotting
+    debug += 3
     WinnerResults = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[sortedPool_Indices[0]], generationNum, 0, False]) for i in range(1,2)), remote=True)
     WinnerResults = np.array(WinnerResults)[0]
     
     printer(WinnerResults, stw0, generationNum, problem = PROBLEMname) # prints the score and results summary
-    
+    debug -= 3
+
+
     #Write winner netlist to a directiory of current run for inspection and manual simulation 
     os.chdir("../_MAIN_data")
     os.chdir("data_" + startdate + "_" + starttime)
     fullRedMx = fullRedundancyBigCircuitMatrix(deepcopy(hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix))
-    makeNetlist(deepcopy(hotGen.pool[sortedPool_Indices[0]]), 0, 0, fullRedMx)
+    makeNetlist_netlister(deepcopy(hotGen.pool[sortedPool_Indices[0]]))
     os.chdir("../") 
 
     #DUMP results for plotting
@@ -312,9 +315,9 @@ if __name__=='__main__':
     
     os.chdir("../_MAIN_work")
     #End of evolution? :
-    if (generationNum > (endingGenNum-1)) | (currentBestScore < minimalScore):
+    if (generationNum > (endingGenNum-1)) or (currentBestScore < minimalScore) or os.path.exists("./STOP"):
       DONE = 1
-      makeNetlist(hotGen.pool[sortedPool_Indices[0]], generationNum, 0, fullRedundancyBigCircuitMatrix(hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix))
+      makeNetlist_netlister(hotGen.pool[sortedPool_Indices[0]])
       #print hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix
       
 
