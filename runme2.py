@@ -2039,9 +2039,9 @@ def evaluate_CommonEmitterAmp(filename):
             'simulator' : 'SpiceOpus',
             'moddefs': {
                 #'def':     { 'file': '/spice/commonemitter/g_' + str(generation) + '_i_' + str(individual) + '_subckt.cir' },
-                'def':     { 'file': '/spice/commonemitter/' + str(filename) },
-                'tb':      { 'file': '/spice/commonemitter/topdc_robust_commonemitter.cir'},#'testTopCircuit_hspice.cir' }, 
-                'models':   {'file': '/spice/commonemitter/models_for_start.inc'}
+                'def':     { 'file': str(filename) },
+                'tb':      { 'file': 'topdc_robust_commonemitter.cir'},#'testTopCircuit_hspice.cir' }, 
+                'models':   {'file': 'models_for_start.inc'}
                 }, 
             'settings':{
                 'debug': 0
@@ -2105,7 +2105,7 @@ deriv = m.dYdX(v("vout"), scale())
 maxderiv = deriv.max()
 __result = (np.std(deriv, dtype="float64")/maxderiv)*100 # norm the std deviation with maximum gain
 """,
-            'vector' : True 
+            'vector' : False 
             }
         }
     corners = {
