@@ -14,7 +14,7 @@ My advice - before you trigger the run, make sure you know, what kind of a circu
 """
 import numpy as np
 # This array contains the set of circuit nodes, that are accessible to the outer world. 
-outerConns = ['gnd','vcc','vout']
+outerConns = ['in','vout','gnd']
 
 """
     {	#Simple resistor
@@ -33,7 +33,7 @@ buildBlocks =  [
       {	#Simple resistor
 	'SpiceElementType': 'r',	# How this element is encoded in Spice netlist
 	'Element': 'Rs',
-	'Quantity': 2, #<---NOTE
+	'Quantity': 0, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
 	'ParamTypes': {'r':'r'},
@@ -72,18 +72,18 @@ buildBlocks =  [
 	  },
       
       {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
-	'SpiceElementType': 'q',
+	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'NPNs',
-	'Quantity': 2,#<---NOTE
+	'Quantity': 3,#<---NOTE
 	'NofPins':  3,
-	'Model': ['bc238b',  'bc238b_sc', 'bc238b_himp'],
+	'Model': ['T2N2222_resil_nom',  'T2N2222_resil_sck', 'T2N2222_resil_himp'],
 	'ParamTypes': {},     
 	  },
       
       {	#Subcircuit with three parallel PNPs
 	'SpiceElementType': 'x',
 	'Element':'3PNPs',
-	'Quantity': 2,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'par3pnp',
 	'ParamTypes': {},     
@@ -91,7 +91,7 @@ buildBlocks =  [
       {	#PNP BJ Transistor
 	'SpiceElementType': 'q',
 	'Element':'PNPs',
-	'Quantity': 1,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'BC308B',
 	'ParamTypes': {},
@@ -99,7 +99,7 @@ buildBlocks =  [
       {	#NMos transistor
 	'SpiceElementType': 'x',
 	'Element':'NMOSs',
-	'Quantity': 4,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'submodn',
 	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},
@@ -107,7 +107,7 @@ buildBlocks =  [
       {	#PMos transistor
 	'SpiceElementType': 'x',
 	'Element':'PMOSs',
-	'Quantity': 6,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  3,
 	'Model': 'submodp',
 	'ParamTypes': {'w':'mos_w', 'l':'mos_l'},
@@ -317,7 +317,7 @@ def returnModelScheme():
     
             if isinstance(buildingBlockType['Model'], list):
                 #print(buildingBlockType['Model'])
-                elementName = buildingBlockType['Element'] + '_' + str(buildingBlockNo)
+                elementName = buildingBlockType['Element'] + '_' + str(buildingBlockNo) #Warning. Underscore is used as delimiter in score functions and netlister. 
                 modelScheme[elementName] = buildingBlockType['Model']
     
     return modelScheme
