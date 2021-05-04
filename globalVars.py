@@ -23,9 +23,10 @@ PROBLEMname = 'scoreCirc_commonEmitterAmp_resilenceMode'
 # scoreCirc_commonEmitterAmp_resilenceMode
 
 seedN = 0		#random seed
-continuee = 	0	#to continue the algorithm from the last run
+continuee = 	1	#to continue the algorithm from the last run
 optimise = 	0	#turn on/off the global parameter optimizer PSADE
-insertAdam = 	0	#insert a working circuit to further evolve
+insertAdam = 	1	#insert a working circuit to further evolve
+robustMode = 1      #iterate through all models listed for device when evaluating
 
 			#(if continuee == 1) 
 			#	copy backdata.pkl into main folder manually! 
@@ -41,7 +42,8 @@ NofRANDOMS = 	20*multipl
 tournamentSize = 3
 
 matingProb = 0.4
-topologyGenOperProb = 0.6 #<-- 1 for MIDEM article
+topologyGenOperProb = 1     # 0...only parameter optimization
+                            # 1...only topology optimization
 
 #---------------------------------------------------
 endingGenNum = 4000 	#top number of generations
