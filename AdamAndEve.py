@@ -13,11 +13,30 @@ from buildingBlocksBank import BigMatrixSize
 
 #---ADAM----
 
-ValueVector = np.array([1e2, 1e2, 1e3, 1e4, 1.8e3])
+ValueVector = np.array([])
 
 vezje = createRandomBigCircuitMatrix(ValueVector).BigCircuitMatrix
 
 AdamMtrx = np.zeros(shape=(BigMatrixSize,BigMatrixSize),dtype=bool)
+
+
+# Common emitter Amp
+#               C B E              i v g              
+AdamMtrx[0]  =  [1,0,0,0,0,0,0,0,0,0,1,0]
+AdamMtrx[1]  =  [0,1,0,0,0,0,0,0,0,1,0,0]
+AdamMtrx[2]  =  [0,0,1,0,0,0,0,0,0,0,0,1]
+AdamMtrx[3]  =  [0,0,0,1,0,0,0,0,0,0,0,0]
+AdamMtrx[4]  =  [0,0,0,0,1,0,0,0,0,0,0,0]
+AdamMtrx[5]  =  [0,0,0,0,0,1,0,0,0,0,0,0]
+AdamMtrx[6]  =  [0,0,0,0,0,0,1,0,0,0,0,0]
+AdamMtrx[7]  =  [0,0,0,0,0,0,0,1,0,0,0,0]
+AdamMtrx[8]  =  [0,0,0,0,0,0,0,0,1,0,0,0]
+AdamMtrx[9]  =  [0,0,0,0,0,0,0,0,0,1,0,0]
+AdamMtrx[10] =  [0,0,0,0,0,0,0,0,0,0,1,0]
+AdamMtrx[11] =  [0,0,0,0,0,0,0,0,0,0,0,1]
+
+adam = circuit(AdamMtrx, ValueVector)
+
 
 #Here we have a simple voltage reference, using zener diode with break-down voltage of 4.3V.
 # CLASSICAL WIDLAR BANDGAP VOLTAGE REFERENCE with additional transistors for search
@@ -69,6 +88,7 @@ AdamMtrx[42] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 """
 
 #A CMOS BANDGAP REFERENCE using Substrate PNP BJTs
+"""
 ValueVector = np.array([30000,   2650, \
 			1.5e-06, 	3.45e-06, 	\
 			2.2e-06,	1.2e-06, 		\
@@ -80,9 +100,10 @@ ValueVector = np.array([30000,   2650, \
 			15e-06 ,	1.2e-06, 		\
 			1e-04,		1.8e-06, 		\
 			1e-04 ,		1.2e-06])
-
+"""
 #		R1  R2  3PNP1 3PNP2 PNP3  nmos1 nmos2 nmos3 nmos4 pmos1 pmos2 pmos3 pmos4 pmos5 pmos6 G V Vout     
 #		       |c b e|c b e|c b e|d g s|d g s|d g s|d g s|d g s|d g s|d g s|d g s|d g s|d g s|
+"""
 AdamMtrx[0] =  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 AdamMtrx[1] =  [0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 AdamMtrx[2] =  [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1]
@@ -131,7 +152,7 @@ AdamMtrx[44] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 AdamMtrx[45] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
 
 adam = circuit(AdamMtrx, ValueVector)
-
+"""
 """
 #VERSION WITH BUILDING BLOCKS:
 
