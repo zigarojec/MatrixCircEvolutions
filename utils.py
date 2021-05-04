@@ -194,8 +194,8 @@ def sortedNonZeroIndices(BigCircuitMatrix):
 	
 	else:
 	  print("sortedNonZeroIndices error. Matrix is empty. Cannot return sorted non zero indices.")
-	  columnsC = None
-	  rowsC = None
+	  columnsC = []    #None
+	  rowsC =  []      #None
 	  return rowsR,columnsR,columnsC,rowsC 
 	  
 def fullRedundancyBigCircuitMatrix(BigCircuitMatrix):
@@ -377,7 +377,7 @@ def printer(results, stw0, generationNum, **kwargs):
   currentBestScore = results[0]
   
   # Common output:
-  stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE::: " +str(currentBestScore) + " Time: "+str(s)+"h "+str(m) +"m " + str(s) + "s"
+  stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE: " + f"{currentBestScore:.4E}" + " Time: "+f"{h:.0f}"+"h "+f"{m:.0f}" +"m " + f"{s:.2f}" + "s"
   
   if kwargs['problem']=='scoreCirc_HighPass':
     #stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE::: " +str(currentBestScore) + " Time: "+str(s)+"h "+str(m) +"m " + str(s) + "s"
@@ -479,5 +479,38 @@ def printer(results, stw0, generationNum, **kwargs):
     except:
       stdoutstring += "\n"+ "No results to show."
     stdoutstring += "\n"+ "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+
+
+  if kwargs['problem']=='scoreCirc_commonEmitterAmp_resilenceMode':
+    #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
+    try:        
+        if robustMode:
+            DCgain = []
+            dcvout_rmse = []
+            maxpower = []
+            gain_stddev_norm = []
+            for result in results[1]:
+                # " ".join(f"{aa:.2e}" for aa in a)
+                DCgain.append(result['DCgain']['nominal'])
+                dcvout_rmse.append(result['dcvout_rmse']['nominal'])
+                maxpower.append(result['maxpower']['nominal'])
+                gain_stddev_norm.append(result['gain_stddev_norm']['nominal'])
+                
+            stdoutstring += "\n\t - DCgain:           "+ " ".join(f"{r:+.2e}" for r in DCgain) + "\tV/A"
+            stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
+            stdoutstring += "\n\t - maxpower:         "+ " ".join(f"{r:+.2e}" for r in maxpower) + "\tW"
+            stdoutstring += "\n\t - gain_stddev_norm: "+ " ".join(f"{r:+.2e}" for r in gain_stddev_norm) + "\t%"                 
+                
+        else:
+            stdoutstring += "\n\t - DCgain:           "+ f"{results[1]['DCgain']['nominal']:.2E}" + "\tV/A"
+            stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"
+            stdoutstring += "\n\t - maxpower:         "+ f"{results[1]['maxpower']['nominal']:.2E}" + "\tW"
+            stdoutstring += "\n\t - gain_stddev_norm: "+ f"{results[1]['gain_stddev_norm']['nominal']:.2E}" + "\t%"              
+      
+    except:
+      stdoutstring += "\nNo results to show."
+    stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+
+
     
   print(stdoutstring)
