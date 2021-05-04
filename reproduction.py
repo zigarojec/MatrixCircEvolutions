@@ -218,18 +218,18 @@ def halfhalfCrossover(ind1, ind2):
 	#--- CROSSOVER ---#
 	#Exchange sexual material - OutConns
 	#Vertically sliced half of OuterConns_gene is exchanged
-	temp = deepcopy(OutConns_gene_1[:,:int(np.floor((BigMatrixSize-NofOutConns)/2))])
-	OutConns_gene_1[:,:int(np.floor((BigMatrixSize-NofOutConns)/2))] = deepcopy(OutConns_gene_2[:,:int(np.floor((BigMatrixSize-NofOutConns)/2))])
-	OutConns_gene_2[:,:int(np.floor((BigMatrixSize-NofOutConns)/2))] = deepcopy(temp)
+	temp = deepcopy(OutConns_gene_1[:,:int(np.floor((BigMatrixSize-NofOutConns)//2))])
+	OutConns_gene_1[:,:int(np.floor((BigMatrixSize-NofOutConns)//2))] = deepcopy(OutConns_gene_2[:,:int(np.floor((BigMatrixSize-NofOutConns)//2))])
+	OutConns_gene_2[:,:int(np.floor((BigMatrixSize-NofOutConns)//2))] = deepcopy(temp)
 	
 	#Exchange sexual material - InterConns
 	#Modified crossover - upper triangle of upper triangular matrix is exchanged (half-half)
 	temp = np.zeros([BigMatrixSize-NofOutConns,BigMatrixSize-NofOutConns], dtype=bool)
-	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))/2))):
+	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))//2))):
 		temp[i,i:(BigMatrixSize-(NofOutConns+1)-i)] = deepcopy(InterConns_gene_1[i,i:(BigMatrixSize-(NofOutConns+1)-i)])
-	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))/2))):
+	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))//2))):
 		InterConns_gene_1[i,i:(BigMatrixSize-(NofOutConns+1)-i)] = deepcopy(InterConns_gene_2[i,i:(BigMatrixSize-(NofOutConns+1)-i)])
-	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))/2))):
+	for i in range(0, int(np.ceil((BigMatrixSize-(NofOutConns+1))//2))):
 		InterConns_gene_2[i,i:(BigMatrixSize-(NofOutConns+1)-i)] = deepcopy(temp[i,i:(BigMatrixSize-(NofOutConns+1)-i)])
 
 	#--- END of CROSSOVER ---#	
@@ -512,10 +512,10 @@ def pinViseCrossover2(ind1, ind2):
     #--- END of CROSSOVER ---#	  
   #ind1_ValueVector, ind2_ValueVector =  valueReproduction(ind1.ValueVector, ind2.ValueVector, crossover="rangeCrossover")
   rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(ind1_MX)
-  if (columnsC == None) | (rowsC == None):
+  if (columnsC == []) or (rowsC == []):
     return ind1, ind2
   rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(ind2_MX)
-  if (columnsC == None) | (rowsC == None):
+  if (columnsC == []) or (rowsC == []):
     return ind1, ind2  
   
   child1 = circuit(ind1_MX, copy(ind1.ValueVector))
@@ -617,13 +617,13 @@ def mutationREMOVEnode(ind1):
 	child1_MX=emptyBigMatrix()	
 	
 	rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(OutConns_gene_1)
-	if (columnsC == None) | (rowsC == None):
+	if (columnsC == []) or (rowsC == []):
 	  return ind1
 	for i in range(len(rowsR)):
 		child1_MX[columnsR[i], BigMatrixSize-(rowsR[i]+1)] = True
 		
 	rowsR,columnsR,columnsC,rowsC = sortedNonZeroIndices(InterConns_gene_1)
-	if (columnsC == None) | (rowsC == None):
+	if (columnsC == []) or (rowsC == []):
 	  return ind1
 	for i in range(len(rowsC)):
 		child1_MX[rowsC[i], columnsC[i]] = True
@@ -650,8 +650,8 @@ def makeNetlist_netlister(circuit, **kwargs): #, generationNum, individualNum
     """
     if len(kwargs) != 0:    # If kwargs are present check their names.
                             # kwargs are used to locate particular elements and set their models/antimodels/failuremodels... 
-        for key, value in kwargs.items():
-            print ("%s == %s" %(key, value)) 
+        #for key, value in kwargs.items():
+            #print ("%s == %s" %(key, value)) 
         if not (('Element' in kwargs) and
                 ('ElementNo' in kwargs) and 
                 ('ModelName' in kwargs)):
@@ -707,7 +707,7 @@ def makeNetlist_netlister(circuit, **kwargs): #, generationNum, individualNum
     
     for buildingBlockTypeNo, buildingBlockType in enumerate(bBB.buildBlocks):
         for buildingBlockNo in range(1, buildingBlockType['Quantity']+1):   # Count, not index.
-            print("Writing buildingBlock ",buildingBlockType['Element'] , buildingBlockTypeNo, "->",  buildingBlockNo)
+            #print("Writing buildingBlock ",buildingBlockType['Element'] , buildingBlockTypeNo, "->",  buildingBlockNo)
             
             # Place all nodes of the element in an array. 
             # Use the set() method to convert the list into a set. Now, if all the elements in the list are equal, the set will contain only one element. This means that element terminals are connected to each other (element not used).
@@ -1603,7 +1603,7 @@ def tournament(generation, NofElite, tournamentSize, POP_SIZE, sortedPool_Indice
   #tour_matrixDensities = np.append(tour_matrixDensities, generation.matrixDensities[sortedPool_Indices[:NofElite]])
   #tour_matrixQuaziIDs = np.append(tour_matrixQuaziIDs, generation.matrixQuaziIDs[sortedPool_Indices[:NofElite]])
   
-  for i in range(0,POP_SIZE/2-NofElite):
+  for i in range(0,POP_SIZE//2-NofElite):
     randomIndices = []
     scoresTemp = []
     for j in range(0, tournamentSize):
