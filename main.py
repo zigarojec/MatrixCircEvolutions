@@ -71,8 +71,8 @@ if __name__=='__main__':
   # Set up MPI for parallel computing
   cOS.setVM(MPI(mirrorMap={
       #TODO set models in home folder for MPI. Fix that...
-    #'models_for_start.inc':'.', 
-    #'topdc_robust_commonemitter.cir':'.', 
+    'models_for_start.inc':'.', 
+    'topdc_robust_commonemitter.cir':'.', 
   }))
   
   generationNum = 0
