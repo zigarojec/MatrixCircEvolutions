@@ -76,7 +76,7 @@ buildBlocks =  [
 	'Element':'NPNs',
 	'Quantity': 3,#<---NOTE
 	'NofPins':  3,
-	'Model': ['T2N2222_resil_nom',  'T2N2222_resil_sck', 'T2N2222_resil_himp'],
+	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp'], #,  'T2N2222_resil_sck'
 	'ParamTypes': {},     
 	  },
       
