@@ -2068,7 +2068,7 @@ def evaluate_CommonEmitterAmp(filename):
             'modules': [ 'def', 'tb', 'models' ], 
             'params': {'rl':1000e3}, 
             'saves': [ ],  
-            'command': "dc(-100e-6, 100e-6, 'lin', 100, 'iin', 'dc')" #if stop point changed, change also in reproduction cost function. 
+            'command': "dc(-200e-6, 200e-6, 'lin', 100, 'iin', 'dc')" #if stop point changed, change also in reproduction cost function. 
             },            
         }
             
