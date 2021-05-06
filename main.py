@@ -76,7 +76,8 @@ if __name__=='__main__':
   datadirname = "data_" + startdate + "_" + starttime
   os.mkdir(datadirname)
   os.mkdir(datadirname + "/" + "diversityPlots")
-  shutil.copy2(working_directory_path + '/globalVars.py', datadirname + '/globalVars.py')	#copy current globalVars script for logging reasons
+  shutil.copy2(working_directory_path + '/globalVars.py', datadirname + '/globalVars.py')	#copy input scripts for logging reasons
+  shutil.copy2(working_directory_path + '/buildingBlocksBank.py', datadirname + '/buildingBlocksBank.py')	
   shutil.copy2(working_directory_path + '/scoreFunctions.py', datadirname + '/scoreFunctions.py')  
   output = open("data.pkl", "wb")
   os.chdir(working_directory_path)  
