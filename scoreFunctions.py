@@ -24,7 +24,7 @@ import globalVars
 #import signal
 
 
-debug = 0
+debug = 10
 
 # TODO Make every scoreFunction a single file. This is getting to damn big!!
 
@@ -41,15 +41,11 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
     if debug > 2:
         print("\t\tG_" + str(gen) + "_I_" + str(indi))
     
-
+    # Checking the connection matrix health
     OcSc, IcNc, SelfConnElm = checkConnsConnected(circuit.BigCircuitMatrix) #Outer connections Short cut, Inner connections Not connected   
 
     score = np.array([0,0,0], dtype="float64") if MOEAMODE == 1 else 0
     
-    
-    # Connection matrix investigation:
-    #   checking the connection matrix health... 
-    score += 2e4*np.exp(OcSc)
     results = None  
     if OcSc > 1:    # if outer connections are short-circuited, punish the individual based on the matrix health and exit.
         score += 1e4*np.exp(OcSc)
@@ -81,7 +77,7 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
                         disfCount += 1
                         _dcgain = 0      
                     else:
-                        _dcgain = abs(dcgain - 4.8e3) if dcgain < 4.8e3 else 0            # Nominal value deducted. # TODO DECIBELS!!
+                        _dcgain = abs(dcgain - 73.6) if dcgain < 73.6 else 0          
                     
                     dcvout_rmse = np.array(results['dcvout_rmse']['nominal'], dtype=float)
                     if np.isnan(dcvout_rmse):
@@ -132,6 +128,7 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
                         print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
                         
                     #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
+                    print("disfCount", disfCount)
                     os.remove(circuit.filename) #cleanup current subcircuit
             
             return score, results_list
