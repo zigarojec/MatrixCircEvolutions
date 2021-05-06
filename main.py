@@ -10,6 +10,7 @@ import collections, pickle, shutil
 import os, sys
 from os import mkdir
 import resource
+from threading import Thread
 
 #Paralellism modules
 from pyopus.parallel import base
@@ -42,12 +43,24 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_commonEmitterAmp_resilenceMode':scoreCirc_commonEmitterAmp_resilenceMode,
 	    } #set this also in paramOptimizer
 
-
 PROBLEM = problems[PROBLEMname]
 MOEAMODE = 0 # DO NOT CHANGE
 
+def check_input():
+    print("Starting listener thread. Type STOP if you want to end the algorithm gently.")
+    while True:
+        _in = input()
+        print("received input: " + _in)
+        if _in.lower() == "stop":
+            #DONE = 1
+            os.mknod("./STOP")
+            break
+
+
+
 if __name__=='__main__':
   #---------------------------------------------------
+  
   t0 = time()
   print()
   print("+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n")
@@ -71,8 +84,8 @@ if __name__=='__main__':
   # Set up MPI for parallel computing
   cOS.setVM(MPI(mirrorMap={
       #TODO set models in home folder for MPI. Fix that...
-    'models_for_start.inc':'.', 
-    'topdc_robust_commonemitter.cir':'.', 
+    #'models_for_start.inc':'.', 
+    #'topdc_robust_commonemitter.cir':'.', 
   }))
   
   generationNum = 0
@@ -130,6 +143,10 @@ if __name__=='__main__':
   #---EVALUATE & SORT INITIAL POPULATION---# 
   print("EVALUATING GENERATION %d" %generationNum)
   stw0 = time()
+  
+  listener_thread = Thread(target = check_input)  # Starting the STOP signal listener. 
+  listener_thread.start()
+  
   #Parallel!! :)
   results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0,len(hotGen.pool))), remote=True)
   results = np.array(results)
@@ -322,5 +339,7 @@ if __name__=='__main__':
       
 
   
+  listener_thread.join(0)
   cOS.finalize()
   print("\n+++	 MATRIX EVOLUTIONS ENDED	+++")
+  
