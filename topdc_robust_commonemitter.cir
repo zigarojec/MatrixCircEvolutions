@@ -1,0 +1,25 @@
+* wrapping circuit for Voltage reference circuit evolution
+* Ziga Rojec, EDA, FE, UL, 2016
+
+*.include 'models_for_start.inc'
+*.include 'hotcircuit.cir'
+
+xcirc in vout 0 HOT_CIRCUIT
+
+*****Power supply*****
+.global vdd
+vdd (vdd 0) dc = 12
+
+******Op-point resistors*****
+r1    (vdd vout) r=20k
+r2    (vout in) r=5k
+
+******Input Current*****
+*.param iref=50u
+iin (in 0) dc={iref}
+
+*****Loads*****
+*.param rl=1000k
+rl (vout 0) r={rl}
+
+*.end
