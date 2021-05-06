@@ -52,8 +52,7 @@ def check_input():
         _in = input()
         print("received input: " + _in)
         if _in.lower() == "stop":
-            #DONE = 1
-            os.mknod("./STOP")
+            os.mknod("./STOP")  # Creates stop file. 
             break
 
 
