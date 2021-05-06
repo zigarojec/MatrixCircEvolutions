@@ -68,16 +68,18 @@ if __name__=='__main__':
   startdate = strftime("%Y_%m_%d")
   starttime = strftime("%H-%M")
   print("Starting date: ", startdate, ", starting time: ", starttime)
-
+  
+  # GET YOUR WORKING DIRECTORY!
+  working_directory_path = os.getcwd()
   os.chdir("../_MAIN_data")
 
   datadirname = "data_" + startdate + "_" + starttime
   os.mkdir(datadirname)
   os.mkdir(datadirname + "/" + "diversityPlots")
-  shutil.copy2('../_MAIN_work/globalVars.py', datadirname + '/globalVars.py')	#copy current globalVars script for logging reasons
-  shutil.copy2('../_MAIN_work/scoreFunctions.py', datadirname + '/scoreFunctions.py')  
+  shutil.copy2(working_directory_path + '/globalVars.py', datadirname + '/globalVars.py')	#copy current globalVars script for logging reasons
+  shutil.copy2(working_directory_path + '/scoreFunctions.py', datadirname + '/scoreFunctions.py')  
   output = open("data.pkl", "wb")
-  os.chdir("../_MAIN_work")  
+  os.chdir(working_directory_path)  
 
 
   # Set up MPI for parallel computing
@@ -327,9 +329,9 @@ if __name__=='__main__':
       pickle.dump(data, output)
     output.close()
     #shutil.copy2('data.pkl', datadirname + '/backdata.pkl')	#copy current .pkl data to current run folder
-    shutil.copy2(datadirname + "/backdata.pkl", "../_MAIN_work/" + "data.pkl")
+    shutil.copy2(datadirname + "/backdata.pkl", working_directory_path + "data.pkl")
     
-    os.chdir("../_MAIN_work")
+    os.chdir(working_directory_path)
     #End of evolution? :
     if (generationNum > (endingGenNum-1)) or (currentBestScore < minimalScore) or os.path.exists("./STOP"):
       DONE = 1
