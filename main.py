@@ -66,7 +66,7 @@ if __name__=='__main__':
 
   ###MINI EVOLUTION CYCLE	
   startdate = strftime("%Y_%m_%d")
-  starttime = strftime("%H-%M")
+  starttime = strftime("%H-%M-%S")
   print("Starting date: ", startdate, ", starting time: ", starttime)
   
   # GET YOUR WORKING DIRECTORY!
@@ -308,12 +308,10 @@ if __name__=='__main__':
     #---Saving results, picle, ...  and so on----#
 
     #Evaluate best one together with results for plotting
-    debug += 3
     WinnerResults = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[sortedPool_Indices[0]], generationNum, 0, False]) for i in range(1,2)), remote=True)
     WinnerResults = np.array(WinnerResults)[0]
     
     printer(WinnerResults, stw0, generationNum, problem = PROBLEMname) # prints the score and results summary
-    debug -= 3
 
 
     #Write winner netlist to a directiory of current run for inspection and manual simulation 
