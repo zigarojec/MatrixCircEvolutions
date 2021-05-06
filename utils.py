@@ -496,13 +496,13 @@ def printer(results, stw0, generationNum, **kwargs):
                 maxpower.append(result['maxpower']['nominal'])
                 gain_stddev_norm.append(result['gain_stddev_norm']['nominal'])
                 
-            stdoutstring += "\n\t - DCgain:           "+ " ".join(f"{r:+.2e}" for r in DCgain) + "\tV/A"
+            stdoutstring += "\n\t - DCgain:           "+ " ".join(f"{r:+.2e}" for r in DCgain) + "\tdB"
             stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
             stdoutstring += "\n\t - maxpower:         "+ " ".join(f"{r:+.2e}" for r in maxpower) + "\tW"
             stdoutstring += "\n\t - gain_stddev_norm: "+ " ".join(f"{r:+.2e}" for r in gain_stddev_norm) + "\t%"                 
                 
         else:
-            stdoutstring += "\n\t - DCgain:           "+ f"{results[1]['DCgain']['nominal']:.2E}" + "\tV/A"
+            stdoutstring += "\n\t - DCgain:           "+ f"{results[1]['DCgain']['nominal']:.2E}" + "\tdB"
             stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"
             stdoutstring += "\n\t - maxpower:         "+ f"{results[1]['maxpower']['nominal']:.2E}" + "\tW"
             stdoutstring += "\n\t - gain_stddev_norm: "+ f"{results[1]['gain_stddev_norm']['nominal']:.2E}" + "\t%"              
