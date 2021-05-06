@@ -278,8 +278,6 @@ def checkConnsConnected(BigCircuitMatrix):
   OutConns = BCMx[:,BigMatrixSize-NofOutConns:BigMatrixSize]
   OutConns = np.array(OutConns, dtype = int)
   
-  print(OutConns)
-  
   suma = 0
   for i in range(0, NofOutConns):
     suma = suma + OutConns[:,i]     # Summing up the array of connections to a single outer conn table count. 

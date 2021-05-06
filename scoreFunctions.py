@@ -24,7 +24,7 @@ import globalVars
 #import signal
 
 
-debug = 10
+debug = 0
 
 # TODO Make every scoreFunction a single file. This is getting to damn big!!
 
