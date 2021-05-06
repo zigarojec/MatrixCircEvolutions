@@ -2076,7 +2076,10 @@ def evaluate_CommonEmitterAmp(filename):
         'DCgain' : {
             'analysis' : 'dc_sweep_tf',
             'corners' : [ 'nominal' ],
-            'expression': 'm.DCgain(v("vout"), scale())',
+            'expression': """
+gain = abs(m.DCgain(v("vout"), scale()))
+__result = m.gain2dB(gain, unit="db20")
+                """,
             'vector' : False,
         },         
         'dcvout_rmse' : {
