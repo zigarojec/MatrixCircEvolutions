@@ -128,7 +128,6 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
                         print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
                         
                     #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
-                    print("disfCount", disfCount)
                     os.remove(circuit.filename) #cleanup current subcircuit
             
             return score, results_list
