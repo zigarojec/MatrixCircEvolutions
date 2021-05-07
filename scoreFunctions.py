@@ -103,7 +103,7 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
 
                     #----------------------------------------------------------Score function SINGLE-OBJECTIVE
                     if MOEAMODE == 0:
-                        score +=  sum([_dcgain, _dcvout_rmse, _maxpower, _gain_stddev_norm])
+                        score +=  sum([_dcvout_rmse, _maxpower, _gain_stddev_norm]) # _dcgain
 
                         if disfCount > 0:
                             score = 0 + np.exp(disfCount) * 1e3 + random.random()*10
