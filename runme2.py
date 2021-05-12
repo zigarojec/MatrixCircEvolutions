@@ -2106,7 +2106,7 @@ __result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) 
             'expression': """
 deriv = m.dYdX(v("vout"), scale())
 maxderiv = deriv.max()
-__result = (np.std(deriv, dtype="float64")/maxderiv)*100 # norm the std deviation with maximum gain
+__result = abs((np.std(deriv, dtype="float64")/maxderiv)*100) # norm the std deviation with maximum gain
 """,
             'vector' : False 
             }
