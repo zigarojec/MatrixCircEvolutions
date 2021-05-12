@@ -80,6 +80,15 @@ buildBlocks =  [
 	'ParamTypes': {},     
 	  },
       
+      {	#PNP BJ Transistor MULTI MODEL ROBUST CHECK TEST
+	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
+	'Element':'NPNs',
+	'Quantity': 0,#<---NOTE
+	'NofPins':  3,
+	'Model': ['2N2907_resil_nom', '2N2907_resil_himp', '2N2907_resil_sck'], #,  
+	'ParamTypes': {},     
+	  },      
+      
       {	#Subcircuit with three parallel PNPs
 	'SpiceElementType': 'x',
 	'Element':'3PNPs',

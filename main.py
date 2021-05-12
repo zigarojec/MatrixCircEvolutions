@@ -338,7 +338,6 @@ if __name__=='__main__':
       #print hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix
       
 
-  
   listener_thread.join(0)
   cOS.finalize()
   print("\n+++	 MATRIX EVOLUTIONS ENDED	+++")
