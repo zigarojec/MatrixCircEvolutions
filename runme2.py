@@ -2044,7 +2044,8 @@ def evaluate_CommonEmitterAmp(filename):
                 'models':   {'file': 'models_for_start.inc'}
                 }, 
             'settings':{
-                'debug': 0
+                'debug': 0,
+                'timeout' : 5, # Preizkusimo timeout 
                     },
             'params':{
                 'temperature': 25,
