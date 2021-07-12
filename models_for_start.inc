@@ -1,7 +1,11 @@
  * This is a list of models that can be used for sythesis of resilent circuit topologies.
+ * xint (internal) nodes are created for measurement purposes (avoiding global node naming of outer-terminals in Spice!)
  
-.subckt T2N2222_resil_nom C B E
-q1 (C B E) T2N2222
+.subckt T2N2222_resil_nom c b e
+vc c cint dc=0
+vb b bint dc=0
+ve e eint dc=0
+q1 (cint bint eint) T2N2222
 .ends
  
 .subckt T2N2222_resil_sck C B E
@@ -53,4 +57,4 @@ re  (E mid) r=1meg
 .model 2N2907 pnp (is=1.1P bf=200 nf=1.2 vaf=50 ikf=0.1 ise=13p
 + ne=1.9 br=6 rc=0.6 cje=23p vje=0.85 mje=1.25 tf=0.5n cjc=19p
 + vjc=0.5 mjc=0.2 tr=34n xtb=1.5)
-.end 
+*.end 
