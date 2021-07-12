@@ -1,0 +1,8 @@
+ 
+*commonemitter
+
+.SUBCKT HOT_CIRCUIT B C E
+xNPN_1   (C B E) T2N2222_resil_nom
+xNPN_2   (C B E) T2N2222_resil_nom
+xNPN_3   (C B E) T2N2222_resil_nom
+.ENDS

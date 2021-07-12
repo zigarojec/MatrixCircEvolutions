@@ -3,9 +3,39 @@ import random
 from copy import copy, deepcopy
 from time import time, strftime
 import collections
+import imp
 
 from globalVars import *
 from buildingBlocksBank import *
+
+
+# dynamic import 
+
+#TODO Inspect something is not ok yet. 
+def dynamic_module_import(name, class_name):
+    # find_module() method is used
+    # to find the module and return
+    # its description and path
+    # As from https://www.geeksforgeeks.org/how-to-dynamically-load-modules-or-classes-in-python/
+    try:
+        fp, path, desc = imp.find_module(name)
+    except ImportError:
+        print ("module not found: " + name)
+    try:
+        # load_modules loads the module 
+        # dynamically ans takes the filepath
+        # module and description as parameter   
+        example_package = imp.load_module(name, fp, path, desc)
+    except Exception as e:
+        print(e)
+    try:
+        
+        myclass = imp.load_module("%s.%s" % (name,class_name), fp, path, desc)
+        print(myclass, type(myclass))
+    except Exception as e:
+        print(e)
+    return example_package, myclass
+
 
 
 #general circuit class
@@ -488,24 +518,26 @@ def printer(results, stw0, generationNum, **kwargs):
             DCgain = []
             dcvout_rmse = []
             maxpower = []
-            gain_stddev_norm = []
+            gain_linearity = []
             for result in results[1]:
                 # " ".join(f"{aa:.2e}" for aa in a)
                 DCgain.append(result['DCgain']['nominal'])
                 dcvout_rmse.append(result['dcvout_rmse']['nominal'])
                 maxpower.append(result['maxpower']['nominal'])
-                gain_stddev_norm.append(result['gain_stddev_norm']['nominal'])
+                gain_linearity.append(result['gain_linearity']['nominal'])
                 
             stdoutstring += "\n\t - DCgain:           "+ " ".join(f"{r:+.2e}" for r in DCgain) + "\tdB"
             stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
             stdoutstring += "\n\t - maxpower:         "+ " ".join(f"{r:+.2e}" for r in maxpower) + "\tW"
-            stdoutstring += "\n\t - gain_stddev_norm: "+ " ".join(f"{r:+.2e}" for r in gain_stddev_norm) + "\t%"                 
+            stdoutstring += "\n\t - gain_linearity:   "+ " ".join(f"{r:+.2e}" for r in gain_linearity) + "\t%"
+            
+            stdoutstring += "\n\t - transistorActive: "+  str(results[1][0]['transistorActive']['nominal']) + "\t%"    
                 
         else:
             stdoutstring += "\n\t - DCgain:           "+ f"{results[1]['DCgain']['nominal']:.2E}" + "\tdB"
             stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"
             stdoutstring += "\n\t - maxpower:         "+ f"{results[1]['maxpower']['nominal']:.2E}" + "\tW"
-            stdoutstring += "\n\t - gain_stddev_norm: "+ f"{results[1]['gain_stddev_norm']['nominal']:.2E}" + "\t%"              
+            stdoutstring += "\n\t - gain_linearity:   "+ f"{results[1]['gain_linearity']['nominal']:.2E}" + "\t%"              
       
     except:
       stdoutstring += "\nNo results to show."

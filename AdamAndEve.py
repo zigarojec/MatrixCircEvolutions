@@ -19,7 +19,7 @@ vezje = createRandomBigCircuitMatrix(ValueVector).BigCircuitMatrix
 
 AdamMtrx = np.zeros(shape=(BigMatrixSize,BigMatrixSize),dtype=bool)
 
-"""
+
 # Common emitter Amp
 #               C B E              i v g              
 AdamMtrx[0]  =  [1,0,0,0,0,0,0,0,0,0,1,0]
@@ -36,7 +36,7 @@ AdamMtrx[10] =  [0,0,0,0,0,0,0,0,0,0,1,0]
 AdamMtrx[11] =  [0,0,0,0,0,0,0,0,0,0,0,1]
 
 adam = circuit(AdamMtrx, ValueVector)
-"""
+
 
 #Here we have a simple voltage reference, using zener diode with break-down voltage of 4.3V.
 # CLASSICAL WIDLAR BANDGAP VOLTAGE REFERENCE with additional transistors for search

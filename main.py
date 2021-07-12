@@ -29,6 +29,7 @@ from reproduction import *
 from scoreFunctions import *
 from paramOptimizer import *
 from buildingBlocksBank import *
+from utils import dynamic_module_import
 
 #Other settings
 np.set_printoptions(threshold=sys.maxsize, linewidth=1000)	#print whole matrix when finished
@@ -36,6 +37,7 @@ np.set_printoptions(threshold=sys.maxsize, linewidth=1000)	#print whole matrix w
 random.seed(seedN)	#Fixed seed
 np.random.seed(seedN)
 
+"""
 problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    'scoreCirc_PassiveBandPass':scoreCirc_PassiveBandPass,
@@ -44,11 +46,22 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    } #set this also in paramOptimizer
 
 PROBLEM = problems[PROBLEMname]
+"""
 MOEAMODE = 0 # DO NOT CHANGE
 
+
+if __name__ == "__main__":
+  module, PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
+  PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
+  # module, PROBLEM = dynamic_module_import("scorefunctions.amplifiers.scoreCirc_commonEmitterAmp_resilenceMode", "scoreCirc_commonEmitterAmp_resilenceMode")
+
+# Listener thread for intermediate STOPPING
 def check_input():
     print("Starting listener thread. Type STOP if you want to end the algorithm gently.")
     while True:
+        if os.path.exists("./STOP"):
+          print("Exiting.")
+          break
         _in = input()
         print("received input: " + _in)
         if _in.lower() == "stop":
@@ -86,7 +99,7 @@ if __name__=='__main__':
   # Set up MPI for parallel computing
   cOS.setVM(MPI(mirrorMap={
       #TODO set models in home folder for MPI. Fix that...
-    #'models_for_start.inc':'.', 
+    #'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
     #'topdc_robust_commonemitter.cir':'.', 
   }))
   
@@ -337,7 +350,7 @@ if __name__=='__main__':
       makeNetlist_netlister(hotGen.pool[sortedPool_Indices[0]])
       #print hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix
       
-
+  
   listener_thread.join(0)
   cOS.finalize()
   print("\n+++	 MATRIX EVOLUTIONS ENDED	+++")

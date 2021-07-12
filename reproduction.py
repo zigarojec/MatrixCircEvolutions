@@ -715,10 +715,15 @@ def makeNetlist_netlister(circuit, **kwargs): #, generationNum, individualNum
             toindex = fromindex + buildingBlockType['NofPins']
             buildingBlockElmNodes = nodesBank[fromindex:toindex]
             nodesBankSliced.append(buildingBlockElmNodes)
-            
+
             if(len(set(buildingBlockElmNodes)) == 1):
-                circ.write("*") #exclude element from netlist if element pins connected together
-            
+                circ.write("")
+                #circ.write("*") #exclude element from netlist if element pins connected together
+                # I will disable this feature for some experimentation 
+                # with robust topologies (in analysis we check if every transistor is "alive")
+                # so we force as many components to be part of the solution. 
+				# TODO. Inform some dictionary, that element is excluded for THE CIRCUIT. Maybe a property on circuit?
+
             circ.write("%s%s_%s " %(buildingBlockType['SpiceElementType'], buildingBlockType['Element'], buildingBlockNo))	#put spice name of element
             circ.write("(")
             for node in buildingBlockElmNodes:

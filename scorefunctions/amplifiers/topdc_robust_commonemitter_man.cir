@@ -1,0 +1,43 @@
+* wrapping circuit for commonemitter circuit evolution
+* Ziga Rojec, EDA, FE, UL, 2021
+
+.include 'models_for_start.inc'
+*.include 'hotcircuit.cir'
+.include 'g_0_i_0_subckt.cir'
+*.include 'scoreCirc_commonEmitterAmp_resilenceMode_g_3657_i_0_subckt.cir'
+
+*xcirc in vout 0 vdd HOT_CIRCUIT
+xcirc in vout 0 HOT_CIRCUIT
+
+*****Power supply*****
+.global vdd
+vdd (vdd 0) dc = 12
+
+******Op-point resistors*****
+r1    (vdd vout) r=4.7k
+r2    (vout in) r=22k
+r3    (in 0)    r=4.7k
+********** TODO pazi, predrugacena shema*********
+
+******Input Current*****
+*.param iref=50u
+iin (in 0) dc=50u
+
+*****Loads*****
+*.param rl=1000k
+rl (vout 0) r=1000k
+
+
+
+.control
+
+
+dc iin -100u 100u 1u
+plot v(vout)
+
+let @iin[sin]=(0;100u;10k)
+tran 1u 100u 
+plot v(vout)
+
+.endc
+.end

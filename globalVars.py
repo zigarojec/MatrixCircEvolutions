@@ -13,9 +13,10 @@ import numpy as np
 from buildingBlocksBank import buildBlocks, paramBounds
 
 #Define the cost function--------------------------
+PROBLEMpath = 'scorefunctions/amplifiers/'	# do not forget the last slash! "path/to/the/module/"
 PROBLEMname = 'scoreCirc_commonEmitterAmp_resilenceMode'
 #---------------------------------------------------
-#Problem names available:
+#Problem names available: (obsolete, please inspect the scorefunctions folder)
 # scoreCirc_ActiveFilter_2
 # scoreCirc_CmosVoltageReference_2
 # scoreCirc_PassiveBandPass

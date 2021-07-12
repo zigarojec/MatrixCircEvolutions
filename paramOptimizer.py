@@ -9,9 +9,10 @@ This script is used by the additional method, that optimizes numerical parameter
 from utils import circuit, slimCircuit
 from copy import copy, deepcopy
 import random
-from utils import returnMaxValueVector, returnMinValueVector
+from utils import returnMaxValueVector, returnMinValueVector, dynamic_module_import
 
 from scoreFunctions import *
+from globalVars import PROBLEMname, PROBLEMpath
 
 #Optimisation modules
 from pyopus.optimizer.psade import ParallelSADE
@@ -20,7 +21,8 @@ from pyopus.optimizer.qpmads import QPMADS
 from pyopus.optimizer.boxcomplex import BoxComplex
 from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
 
-#Available problems - score functions
+"""
+#Available problems - score functions - NOTE This was replaced by dynamic module loader from utils.py. NOT YET TESTED. 
 problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    'scoreCirc_PassiveBandPass':scoreCirc_PassiveBandPass,
@@ -28,7 +30,7 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
         'scoreCirc_commonEmitterAmp_resilenceMode':scoreCirc_commonEmitterAmp_resilenceMode,
 	    } #set this also in main
 PROBLEM = problems[PROBLEMname]
-
+"""
   
 #naredi class, ki bo ob inicializaciji vzel topologijo, klic funkcije pa bo vzel ValueVector KUUUL!
 
@@ -42,12 +44,14 @@ class circuitUnderOptimiser:
   def __init__(self, BigCircuitMatrix):
     self.BigCircuitMatrix = BigCircuitMatrix
     self.fullMatrix = fullRedundancyBigCircuitMatrix(self.BigCircuitMatrix)
+    self.module, self.PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
+    self.PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
     #self.fullMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
   def __call__(self, ValueVector):
     """Problem to optimise."""
     circuitHOT = slimCircuit(self.BigCircuitMatrix, ValueVector)
     circuitHOT.fullRedundancyMatrix = self.fullMatrix
-    score, results = PROBLEM(circuitHOT, 1, random.randint(1,100000),False) #HERE! Every evaluated file gets a random number between 1 and 100000, since they spawn in the root folder when run in single-thread mode. With a dirty and simple solution comes a stupid hazard, since files two can get the same name with the probability of 1/1000000. You have been warned. 
+    score, results = self.PROBLEM(circuitHOT, 1, random.randint(1,100000),False) #HERE! Every evaluated file gets a random number between 1 and 100000, since they spawn in the root folder when run in single-thread mode. With a dirty and simple solution comes a stupid hazard, since files two can get the same name with the probability of 1/1000000. You have been warned. 
     return score
 
 probLOW = returnMinValueVector()
