@@ -12,14 +12,7 @@ from os import mkdir
 import resource
 from threading import Thread
 
-#Paralellism modules
-from pyopus.parallel import base
-from pyopus.parallel.cooperative import cOS
-from pyopus.parallel.mpi import MPI
-
-#Optimisation modules
-from pyopus.optimizer.psade import ParallelSADE
-from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
+#import dill
 
 #My modules
 from globalVars import *
@@ -29,7 +22,28 @@ from reproduction import *
 from scoreFunctions import *
 from paramOptimizer import *
 from buildingBlocksBank import *
+
 from utils import dynamic_module_import
+
+if __name__ == "__main__":
+  module, PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
+  PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
+  # module, PROBLEM = dynamic_module_import("scorefunctions.amplifiers.scoreCirc_commonEmitterAmp_resilenceMode", "scoreCirc_commonEmitterAmp_resilenceMode")
+  #PROBLEM = deepcopy(PROBLEM)
+
+
+
+#Paralellism modules
+from pyopus.parallel import base
+from pyopus.parallel.cooperative import cOS
+from pyopus.parallel.mpi import MPI
+
+#Optimisation modules
+from pyopus.optimizer.psade import ParallelSADE
+from pyopus.optimizer.base import Reporter, CostCollector, RandomDelay
+
+
+
 
 #Other settings
 np.set_printoptions(threshold=sys.maxsize, linewidth=1000)	#print whole matrix when finished
@@ -50,10 +64,6 @@ PROBLEM = problems[PROBLEMname]
 MOEAMODE = 0 # DO NOT CHANGE
 
 
-if __name__ == "__main__":
-  module, PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
-  PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
-  # module, PROBLEM = dynamic_module_import("scorefunctions.amplifiers.scoreCirc_commonEmitterAmp_resilenceMode", "scoreCirc_commonEmitterAmp_resilenceMode")
 
 # Listener thread for intermediate STOPPING
 def check_input():
@@ -99,8 +109,8 @@ if __name__=='__main__':
   # Set up MPI for parallel computing
   cOS.setVM(MPI(mirrorMap={
       #TODO set models in home folder for MPI. Fix that...
-    #'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
-    #'topdc_robust_commonemitter.cir':'.', 
+    'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
+    'topdc_robust_commonemitter.cir':'.', 
   }))
   
   generationNum = 0

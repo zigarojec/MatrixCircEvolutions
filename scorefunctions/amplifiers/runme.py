@@ -222,5 +222,4 @@ __result =  float(sum(transistorActive))/len(transistorList)
 
     # Cleanup intemediate files
     pe.finalize()
-
     return cf, results

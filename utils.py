@@ -31,7 +31,7 @@ def dynamic_module_import(name, class_name):
     try:
         
         myclass = imp.load_module("%s.%s" % (name,class_name), fp, path, desc)
-        print(myclass, type(myclass))
+        #print(myclass, type(myclass))
     except Exception as e:
         print(e)
     return example_package, myclass
