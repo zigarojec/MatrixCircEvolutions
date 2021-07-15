@@ -74,7 +74,7 @@ buildBlocks =  [
       {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'NPNs',
-	'Quantity': 3,#<---NOTE
+	'Quantity': 4,#<---NOTE
 	'NofPins':  3,
 	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp', 'T2N2222_resil_sck'], #,  
 	'ParamTypes': {},     
@@ -83,7 +83,7 @@ buildBlocks =  [
       {	#PNP BJ Transistor MULTI MODEL ROBUST CHECK TEST
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'PNPs',
-	'Quantity': 0,#<---NOTE
+	'Quantity': 4,#<---NOTE
 	'NofPins':  3,
 	'Model': ['2N2907_resil_nom', '2N2907_resil_himp', '2N2907_resil_sck'], #,  
 	'ParamTypes': {},     
