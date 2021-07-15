@@ -32,8 +32,11 @@ re  (E mid) r=1meg
 
 
 
-.subckt 2N2907_resil_nom C B E
-q1 (C B E) 2N2907
+.subckt 2N2907_resil_nom c b e
+vc c cint dc=0
+vb b bint dc=0
+ve e eint dc=0
+q1 (cint bint eint) 2N2907
 .ends
  
 .subckt 2N2907_resil_sck C B E

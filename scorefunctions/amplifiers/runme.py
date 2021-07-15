@@ -160,8 +160,12 @@ __result = derivdiff
             # Then we calculate a derivative over the input signal. 
             # If both dice/dscale and dvce/dscale produce at least 1/100 of maximal derivative, 
             # then a transistor is somehow connected to the input signal, or "is alive". 
+            # TODO 1: Return a vector of active transistors. Calculate the procent in another analysis. 
+            # TODO 2: transistorList has to be imported from buildingBlocksBank somehow...
+
+
             'script': """   
-transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3']
+transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4']  #
 transistorActive = []
 for t in transistorList:
     #vce = v('cint:' + t + ':xcirc', 'eint:' + t + ':xcirc') #Vce 
@@ -182,7 +186,6 @@ __result =  float(sum(transistorActive))/len(transistorList)
 """,
             'vector' : False
             }  
-
 
 
     # Parameters
