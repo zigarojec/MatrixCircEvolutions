@@ -74,7 +74,7 @@ __result = m.gain2dB(gain, unit="db20")
             'analysis' : 'dc_sweep_tf',
             'corners' : [ 'nominal' ],
             'script': """
-targets = 20e3*scale() + 0.66 #linear gain of 4.8kV/A with offset 0.66
+targets = 20e3*scale() + 0.66 #linear gain with offset 0.66
 outputs = v("vout")
 __result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
 """,
@@ -116,7 +116,7 @@ __result = derivdiff
         {
             'measure': 'DCgain',
             'norm': Nabove(70, failure=10000.0), 	
-            'reduce': Rworst()
+            'reduce': Rexcluded() #Rworst()
         },
         {
             'measure': 'dcvout_rmse',
@@ -131,7 +131,7 @@ __result = derivdiff
         {
             'measure': 'gain_linearity',
             'norm': Nbelow(0.1, failure=10000.0), 	
-            'reduce': Rworst()
+            'reduce': Rexcluded() #Rworst()
         },   
     ]
     # End definition

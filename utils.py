@@ -544,5 +544,8 @@ def printer(results, stw0, generationNum, **kwargs):
     stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
 
 
-    
+  log = open("../_MAIN_data/" + kwargs['resultspath'] + "/" + "results.txt", "wt") 
+  log.write(stdoutstring)
+  log.close()
+  
   print(stdoutstring)

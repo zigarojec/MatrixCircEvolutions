@@ -101,7 +101,11 @@ if __name__=='__main__':
   os.mkdir(datadirname + "/" + "diversityPlots")
   shutil.copy2(working_directory_path + '/globalVars.py', datadirname + '/globalVars.py')	#copy input scripts for logging reasons
   shutil.copy2(working_directory_path + '/buildingBlocksBank.py', datadirname + '/buildingBlocksBank.py')	
-  shutil.copy2(working_directory_path + '/scoreFunctions.py', datadirname + '/scoreFunctions.py')  
+  #shutil.copy2(working_directory_path + '/scoreFunctions.py', datadirname + '/scoreFunctions.py')  
+  shutil.copy2(working_directory_path + "/" + PROBLEMpath + PROBLEMname + ".py", datadirname + "/" + PROBLEMname + ".py")
+  shutil.copy2(working_directory_path + "/" + PROBLEMpath + "/" + "runme.py", datadirname + "/" + "runme.py")
+
+
   output = open("data.pkl", "wb")
   os.chdir(working_directory_path)  
 
@@ -191,7 +195,7 @@ if __name__=='__main__':
   #najboljsi v generaciji je...
   print(":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore))
   
-  printer(results[sortedPool_Indices[0]], stw0, generationNum, problem=PROBLEMname)
+  printer(results[sortedPool_Indices[0]], stw0, generationNum, problem=PROBLEMname, resultspath = datadirname)
   bestScoresList.append(hotGen.scores[sortedPool_Indices[0]])
   averageScoresList.append(np.average(hotGen.scores))
   
@@ -334,7 +338,7 @@ if __name__=='__main__':
     WinnerResults = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[sortedPool_Indices[0]], generationNum, 0, False]) for i in range(1,2)), remote=True)
     WinnerResults = np.array(WinnerResults)[0]
     
-    printer(WinnerResults, stw0, generationNum, problem = PROBLEMname) # prints the score and results summary
+    printer(WinnerResults, stw0, generationNum, problem = PROBLEMname, resultspath = datadirname) # prints the score and results summary
 
 
     #Write winner netlist to a directiory of current run for inspection and manual simulation 
