@@ -33,7 +33,7 @@ buildBlocks =  [
       {	#Simple resistor
 	'SpiceElementType': 'r',	# How this element is encoded in Spice netlist
 	'Element': 'Rs',
-	'Quantity': 0, #<---NOTE
+	'Quantity': 3, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
 	'ParamTypes': {'r':'r'},
