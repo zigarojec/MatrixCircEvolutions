@@ -144,7 +144,7 @@ __result = derivdiff
             definition.append(
                 {
                     'measure': 'transistorActive',
-                    'norm': Nabove(0.8, 1e-3, failure=10000.0), 	
+                    'norm': Nabove(0.8, 1e-4, failure=10000.0), 	
                     'reduce': Rworst()
                 }
             )

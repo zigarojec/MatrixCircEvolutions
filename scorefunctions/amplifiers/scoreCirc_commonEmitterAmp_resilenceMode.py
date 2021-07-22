@@ -78,7 +78,7 @@ def scoreCirc_commonEmitterAmp_resilenceMode(circuit, gen, indi, MOEAMODE):
 
             #----------------------------------------------------------Score function SINGLE-OBJECTIVE
             if MOEAMODE == 0:
-                score =  score_array.sum()
+                score =  (1 + score_array.std())*score_array.sum()  # Mind the gap between device evaluation scores
             
             #----------------------------------------------------------Score function MULTI-OBJECTIVE
             else: #MOEAMODE == 1

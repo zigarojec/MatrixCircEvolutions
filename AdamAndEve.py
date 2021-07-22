@@ -37,7 +37,6 @@ AdamMtrx[11] =  [0,0,0,0,0,0,0,0,0,0,0,1]
 
 adam = circuit(AdamMtrx, ValueVector)
 """
-
 #Here we have a simple voltage reference, using zener diode with break-down voltage of 4.3V.
 # CLASSICAL WIDLAR BANDGAP VOLTAGE REFERENCE with additional transistors for search
 #		R   R0  R1  R2  R3  ZD  NPN1  NPN2  NPN3  NPN4  NPN5  NPN6  PNP1  PNP2  PNP3  G V i Vout
