@@ -750,7 +750,7 @@ def makeNetlist_netlister(circuit, **kwargs): #, generationNum, individualNum
             if len(buildingBlockType['ParamTypes'])>0:
                 # Pisi parametre
                 for param in buildingBlockType['ParamTypes']:
-                    circ.write(" %s = %s " %(param, ValueVector[value_index]))
+                    circ.write(" %s=%s " %(param, ValueVector[value_index]))
                     value_index += 1
 
             

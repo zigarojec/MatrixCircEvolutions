@@ -14,14 +14,14 @@ My advice - before you trigger the run, make sure you know, what kind of a circu
 """
 import numpy as np
 # This array contains the set of circuit nodes, that are accessible to the outer world. 
-outerConns = ['in','vout','gnd']
+outerConns = ['vout','gnd']
 
 """
     {	#Simple resistor
 'SpiceElementType': 'r',	      # How this element is encoded (initiated) in Spice netlist  
 'Element': 'Rs',               # How do we name it
 'Quantity': 2, #<---NOTE       # How many devices
-'NofPins':  2,                 # How manz terminals
+'NofPins':  2,                 # How many terminals
 'Model': '',                   # Name of the model(s)
 'ParamTypes': {'r':'r'},       # Dictionary of parameter names vs. parameter types
     },    
@@ -33,7 +33,7 @@ buildBlocks =  [
       {	#Simple resistor
 	'SpiceElementType': 'r',	# How this element is encoded in Spice netlist
 	'Element': 'Rs',
-	'Quantity': 0, #<---NOTE
+	'Quantity': 10, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
 	'ParamTypes': {'r':'r'},
@@ -57,7 +57,7 @@ buildBlocks =  [
       {	#Zener diode
 	'SpiceElementType': 'd',
 	'Element':'ZDs',
-	'Quantity': 4,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': 'zd4v7',
 	'ParamTypes': {},
@@ -74,7 +74,7 @@ buildBlocks =  [
       {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'NPNs',
-	'Quantity': 4,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
+	'Quantity': 0,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
 	'NofPins':  3,
 	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp', 'T2N2222_resil_sck'], #,  
 	'ParamTypes': {},     
@@ -83,12 +83,31 @@ buildBlocks =  [
       {	#PNP BJ Transistor MULTI MODEL ROBUST CHECK TEST
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'PNPs',
-	'Quantity': 4,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
+	'Quantity': 0,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
 	'NofPins':  3,
 	'Model': ['2N2907_resil_nom', '2N2907_resil_himp', '2N2907_resil_sck'], #,  
 	'ParamTypes': {},     
 	  },      
-      
+      {	#Zener diode ROBUST MODE
+	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
+	'Element':'ZDs',
+	'Quantity': 4,#<---NOTE
+	'NofPins':  2,
+	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_himp', 'zd4v7_resil_sck'],
+	'ParamTypes': {},
+	  },
+
+      {	#Voltage supply
+	'SpiceElementType': 'x', # Check subcircuit in models
+	'Element':'VDC',
+	'Quantity': 1,#<---NOTE
+	'NofPins':  2,
+	'Model': 'vdc',
+	'ParamTypes': {'v':'v'},     
+	  },
+
+
+
       {	#Subcircuit with three parallel PNPs
 	'SpiceElementType': 'x',
 	'Element':'3PNPs',
@@ -242,8 +261,8 @@ buildBlocks =  [
     
 
 paramBounds = {
-  'r':{'min': 1e3,#Spremenjeno 6.9.2017
-       'max': 1e7,
+  'r':{'min': 1e1,
+       'max': 1e4,
        'scale': 96,	#---not used--------scales (E):	96, 	48, 	24, 	12,	None for linear
 	 },		#---------------------------	1%	2%	5%	10%
   'c':{'min': 1e-12,
@@ -254,6 +273,12 @@ paramBounds = {
        'max': 1e-3,
        'scale': None,
 	 },
+	'v':{
+		'min': 0, #V
+       	'max': 6,
+       	'scale': None,
+	},
+
   'mos_w':{'min': 1.8e-07,
        'max': 0.0001,
        'scale': None,

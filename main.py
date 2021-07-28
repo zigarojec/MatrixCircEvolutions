@@ -115,6 +115,7 @@ if __name__=='__main__':
       #TODO set models in home folder for MPI. Fix that...
     'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
     'topdc_robust_commonemitter.cir':'.', 
+    'topdc_robust_squareroot.cir':'.',
   }))
   
   generationNum = 0
@@ -355,7 +356,8 @@ if __name__=='__main__':
       pickle.dump(data, output)
     output.close()
     #shutil.copy2('data.pkl', datadirname + '/backdata.pkl')	#copy current .pkl data to current run folder
-    shutil.copy2(datadirname + "/backdata.pkl", working_directory_path + "data.pkl")
+    #shutil.copy2(datadirname + "/backdata.pkl", working_directory_path + "backdata.pkl")
+    shutil.copy2(datadirname + "/backdata.pkl", "./backdata.pkl")
     
     os.chdir(working_directory_path)
     #End of evolution? :

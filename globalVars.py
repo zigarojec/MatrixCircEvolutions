@@ -13,8 +13,8 @@ import numpy as np
 from buildingBlocksBank import buildBlocks, paramBounds
 
 #Define the cost function--------------------------
-PROBLEMpath = 'scorefunctions/amplifiers/'	# do not forget the last slash! "path/to/the/module/"
-PROBLEMname = 'scoreCirc_commonEmitterAmp_resilenceMode'
+PROBLEMpath = 'scorefunctions/arithmetic/'	# do not forget the last slash! "path/to/the/module/"
+PROBLEMname = 'scoreCirc_squareroot_resilenceMode'
 #---------------------------------------------------
 #Problem names available: (obsolete, please inspect the scorefunctions folder)
 # scoreCirc_ActiveFilter_2
@@ -26,8 +26,8 @@ PROBLEMname = 'scoreCirc_commonEmitterAmp_resilenceMode'
 seedN = 0		#random seed
 continuee = 	0	#to continue the algorithm from the last run
 optimise = 	0	#turn on/off the global parameter optimizer PSADE
-insertAdam = 	1	#insert a working circuit to further evolve
-robustMode = 1      #iterate through all models listed for device when evaluating
+insertAdam = 	0	#insert a working circuit to further evolve
+robustMode = 0      #iterate through all models listed for device when evaluating
 
 			#(if continuee == 1) 
 			#	copy backdata.pkl into main folder manually! 
@@ -43,7 +43,7 @@ NofRANDOMS = 	20*multipl
 tournamentSize = 3
 
 matingProb = 0.4
-topologyGenOperProb = 1     # 0...only parameter optimization
+topologyGenOperProb = 0.5     # 0...only parameter optimization
                             # 1...only topology optimization
 
 #---------------------------------------------------
@@ -53,16 +53,6 @@ minimalScore = 0.01 	#stopping criteria based on Score (cost function)
 DONE = 0		#global variable that is set to 1 when an individual fulfills criteria
 #---------------------------------------------------
 
-
-
-#MODELS (Obsolete. Already set in buildingBlocksBank.)
-MODEL_ZENER = 	"zd4v7"
-MODEL_NPN = 	"bc238b"
-SUBCKT_par3pnp = "par3pnp"
-MODEL_PNP = 	"BC308B"
-MODEL_OPAMP1 = 	"LM348T"#"LM741N"
-MODEL_NMOS = 	"submodn"
-MODEL_PMOS = 	"submodp"
 
 #Mutiplication parameters for nmos and pmos 
 #TODO: Move to buildingBlocksBank.
