@@ -6,13 +6,13 @@ import numpy as np
 import random
 from time import time, strftime
 from copy import copy, deepcopy
-import collections, pickle, shutil
+import collections, shutil, pickle
 import os, sys
 from os import mkdir
 import resource
 from threading import Thread
 
-#import dill
+
 
 #My modules
 from globalVars import *

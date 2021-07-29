@@ -5,6 +5,8 @@ Ziga Rojec, EDA group, Faculty of Electrical Engineering, University of Ljubljan
 This script is used by the additional method, that optimizes numerical parameters of a single topology. This is used when optimize is set to 1 in globalVars.py.
 
 """
+import dill
+
 
 from utils import circuit, slimCircuit
 from copy import copy, deepcopy
@@ -13,6 +15,10 @@ from utils import returnMaxValueVector, returnMinValueVector, dynamic_module_imp
 
 from scoreFunctions import *
 from globalVars import PROBLEMname, PROBLEMpath
+
+from scorefunctions.arithmetic.scoreCirc_squareroot_resilenceMode import scoreCirc_squareroot_resilenceMode as PROBLEM
+
+
 
 #Optimisation modules
 from pyopus.optimizer.psade import ParallelSADE
@@ -44,8 +50,11 @@ class circuitUnderOptimiser:
   def __init__(self, BigCircuitMatrix):
     self.BigCircuitMatrix = BigCircuitMatrix
     self.fullMatrix = fullRedundancyBigCircuitMatrix(self.BigCircuitMatrix)
-    self.module, self.PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
-    self.PROBLEM = getattr(self.PROBLEMCLASS, PROBLEMname)
+    #self.module, self.PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname) 
+    # It is just nonesence. I just wanted to have dynamically importable PROBLEM but it seemes not to work. 
+    # MPI says that it cannot pickle a module object. So I had to switch back to old manual importing. 
+    #self.PROBLEM = getattr(self.PROBLEMCLASS, PROBLEMname)
+    self.PROBLEM = PROBLEM
     #self.fullMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
   def __call__(self, ValueVector):
     """Problem to optimise."""
@@ -64,7 +73,7 @@ def optimiseCircuit(topology, values, maxIter):
       Here, the parameter optimization algorithm is run. 
   """
   print("... optimising values ...")
-  problem = copy(circuitUnderOptimiser(topology)) # This was changed from deepcopy INSPECT! TEST!
+  problem = circuitUnderOptimiser(topology) # This was changed from deepcopy INSPECT! TEST!
   initValues = copy(values)
   
   opt = ParallelSADE(problem, probLOW, probHIGH, debug=0, maxiter=maxIter)
