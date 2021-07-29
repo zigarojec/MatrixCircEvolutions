@@ -267,7 +267,7 @@ if __name__=='__main__':
     deltaScore = abs(np.average(bSL_npA[-10:])-tempPool.scores[sortedTempPool_Indices[0]])
     
     #if (optimise == True) & (currentBestScore < 300) & ((currentBestScore < 100) | (deltaScore < 1.0)) & (not generationNum%20):
-    if (optimise == True) & (((generationNum > 30) & (deltaScore < 1.0) & (not generationNum%20)) | (generationNum < 2)):
+    if (optimise == True) & (((generationNum > 30) & (deltaScore < 1e-1) & (not generationNum%20)) | (generationNum < 2)):
       bestToOptimise = [0, random.randint(1,NofElite), random.randint(NofElite+1, 10*NofElite)]
       if generationNum < 2:
         bestToOptimise = [0] #in first generation optimise just adam!
@@ -277,7 +277,7 @@ if __name__=='__main__':
         values = copy(tempPool.pool[sortedTempPool_Indices[i]].ValueVector)
 
         print("Circuit ", i, "from gen", generationNum, "...")
-        maxiter = 3000 if generationNum < 100 else 8000
+        maxiter = 300 if generationNum < 100 else 8000
         x, f = optimiseCircuit(topology, values, maxiter)
         tempPool.pool = np.append(deepcopy(circuit(topology, x)), tempPool.pool)
         tempPool.pool[0] = dispatchCircuitObjectGeneration(tempPool.pool[0],0)

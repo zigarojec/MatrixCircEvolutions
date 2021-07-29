@@ -41,16 +41,25 @@ def dynamic_module_import(name, class_name):
 #general circuit class
 
 class slimCircuit:
-	"""
-	We make the circuit object. 
-	Just putting together BigCircuitMatrix and ValueVector to have them in one place. 
-	This class cointains no method calls. It is only needed to store topology and values for faster parameter optimizing.
-	"""
-	def __init__(self, BigCircuitMatrix, ValueVector):
-		self.BigCircuitMatrix = BigCircuitMatrix
-		#self.fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
-		self.fullRedundancyMatrix = None
-		self.ValueVector = ValueVector
+  """
+  We make the circuit object. 
+  Just putting together BigCircuitMatrix and ValueVector to have them in one place. 
+  This class cointains no method calls. It is only needed to store topology and values for faster parameter optimizing.
+  """
+  def __init__(self, BigCircuitMatrix, ValueVector):
+    self.PROBLEMname = PROBLEMname    # from globalVars
+
+    self.generationNum = None    # TEST!
+    self.individualNum = None    # TEST!
+
+    self.BigCircuitMatrix = BigCircuitMatrix
+    #self.fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
+    self.fullRedundancyMatrix = None
+    self.ValueVector = ValueVector
+
+  @property
+  def filename(self):
+      return str(self.PROBLEMname) + "_g_" + str(self.generationNum) + "_i_" + str(self.individualNum) + "_subckt.cir"
 		
 class circuit:
     """

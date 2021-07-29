@@ -45,7 +45,7 @@ class circuitUnderOptimiser:
     self.BigCircuitMatrix = BigCircuitMatrix
     self.fullMatrix = fullRedundancyBigCircuitMatrix(self.BigCircuitMatrix)
     self.module, self.PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
-    self.PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
+    self.PROBLEM = getattr(self.PROBLEMCLASS, PROBLEMname)
     #self.fullMatrix = fullRedundancyBigCircuitMatrix(BigCircuitMatrix)
   def __call__(self, ValueVector):
     """Problem to optimise."""
@@ -64,7 +64,7 @@ def optimiseCircuit(topology, values, maxIter):
       Here, the parameter optimization algorithm is run. 
   """
   print("... optimising values ...")
-  problem = deepcopy(circuitUnderOptimiser(topology))
+  problem = copy(circuitUnderOptimiser(topology)) # This was changed from deepcopy INSPECT! TEST!
   initValues = copy(values)
   
   opt = ParallelSADE(problem, probLOW, probHIGH, debug=0, maxiter=maxIter)
