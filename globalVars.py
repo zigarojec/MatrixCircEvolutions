@@ -27,7 +27,7 @@ seedN = 0		#random seed
 continuee = 	0	#to continue the algorithm from the last run
 optimise = 	1	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve
-robustMode = 0      #iterate through all models listed for device when evaluating
+robustMode = 1      #iterate through all models listed for device when evaluating
 
 			#(if continuee == 1) 
 			#	copy backdata.pkl into main folder manually! 

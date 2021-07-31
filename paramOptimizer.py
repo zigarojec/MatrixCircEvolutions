@@ -76,8 +76,8 @@ def optimiseCircuit(topology, values, maxIter):
   problem = circuitUnderOptimiser(topology) # This was changed from deepcopy INSPECT! TEST!
   initValues = copy(values)
   
-  opt = ParallelSADE(problem, probLOW, probHIGH, debug=0, maxiter=maxIter)
-  #opt = HookeJeeves(problem, probLOW, probHIGH, debug=10, maxiter=10000)
+  #opt = ParallelSADE(problem, probLOW, probHIGH, debug=0, maxiter=maxIter)
+  opt = HookeJeeves(problem, probLOW, probHIGH, debug=00, maxiter=maxIter)
   #opt=BoxComplex(problem, probLOW, probHIGH, maxiter=10000, fstop = 0.1) #settings
   
   cc=CostCollector()

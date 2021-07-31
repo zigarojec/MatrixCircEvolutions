@@ -8,6 +8,7 @@ import matplotlib.gridspec as gridspec
 import pickle
 import numpy as np
 from reproduction import fullRedundancyBigCircuitMatrix
+import globalVars as GLOBAL
 
 with open("../_MAIN_data/backdata.pkl","rb") as pkl_file:
   data = pickle.load(pkl_file)
@@ -641,20 +642,26 @@ def squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, 
   #mtrxDensPlt.hold(False)
 
   #plot results (VOLTAGE REFERENCE)
-  try:
-    vdd_sweep1.set_title('Vout(Vin)')
-    vdd_sweep1.set_ylabel('[V]')
-    vdd_sweep1.set_xlabel('[V]')
-    vdd_sweep1.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
-                          
-    vdd_sweep2.set_title('Vout(Vin)')
-    vdd_sweep2.set_ylabel('[V]')
-    vdd_sweep2.set_xlabel('[V]')
-    vdd_sweep2.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
+  #try:
+  vdd_sweep1.set_title('Vout(Vin)')
+  vdd_sweep1.set_ylabel('[V]')
+  vdd_sweep1.set_xlabel('[V]')
+                        
+  vdd_sweep2.set_title('Vout(Vin)')
+  vdd_sweep2.set_ylabel('[V]')
+  vdd_sweep2.set_xlabel('[V]')
+  
+  if not GLOBAL.robustMode:
     vdd_sweep2.plot(result[1]['scale']['nominal'], np.sqrt(result[1]['scale']['nominal']), '.')
+    vdd_sweep2.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
+  else:
+    vdd_sweep2.plot(result[1][0]['scale']['nominal'], np.sqrt(result[1][0]['scale']['nominal']), '.')
+    for r in result[1]:
+      vdd_sweep2.plot(r['scale']['nominal'], r['vout']['nominal'], '-')
 
-  except:
-    print("No results to plot.")
+
+  #except:
+  #  print("No results to plot.")
   vdd_sweep1.grid(True)
   #vdd_sweep1.hold(False)
   
