@@ -78,8 +78,9 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
 
             #----------------------------------------------------------Score function SINGLE-OBJECTIVE
             if MOEAMODE == 0:
-                score =  (1 + score_array.std())*score_array.sum()  # Mind the gap between device evaluation scores
-            
+                #score =  (1 + score_array.std())*score_array.sum()  # Mind the gap between device evaluation scores
+                score = score_array.sum()
+
             #----------------------------------------------------------Score function MULTI-OBJECTIVE
             else: #MOEAMODE == 1
                 score = np.array([_dcgain, _maxpower, _gain_stddev_norm]) + 0 # + _dcvout_rmse

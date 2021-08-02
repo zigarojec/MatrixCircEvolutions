@@ -91,9 +91,9 @@ buildBlocks =  [
       {	#Zener diode ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
 	'Element':'ZDs',
-	'Quantity': 4,#<---NOTE
+	'Quantity': 8,#<---NOTE
 	'NofPins':  2,
-	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_himp', 'zd4v7_resil_sck'],
+	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_sck'], #, 'zd4v7_resil_himp'
 	'ParamTypes': {},
 	  },
 
