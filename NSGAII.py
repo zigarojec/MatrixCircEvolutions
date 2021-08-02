@@ -40,8 +40,8 @@ def fast_nondominated_sort(popu):
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time() 
-  print "Internal time calculation fast_nondominated_sort: %f s" %(stw1-stw0),
-  print c1, c2, c3
+  print("Internal time calculation fast_nondominated_sort: %f s" %(stw1-stw0)),
+  print(c1, c2, c3)
   i = 0
   while len(popu.fronts[i]) > 0:
     temp = []
@@ -102,8 +102,8 @@ def faster_nondominated_sort(popu):
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time() 
-  print "Internal time calculation faster_nondominated_sort: %f s" %(stw1-stw0),
-  print c1, c2, c3
+  print("Internal time calculation faster_nondominated_sort: %f s" %(stw1-stw0)),
+  print(c1, c2, c3)
   i = 0
   while len(popu.fronts[i]) > 0:
     temp = []
@@ -166,8 +166,8 @@ def faster_nondominated_sort2(popu):
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time()
-  print "Internal time calculation faster_nondominated_sort: %f s" %(stw1-stw0),
-  print c1, c2, c3
+  print("Internal time calculation faster_nondominated_sort: %f s" %(stw1-stw0)),
+  print(c1, c2, c3)
   i = 0
   while len(popu.fronts[i]) > 0:
     temp = []
@@ -200,7 +200,7 @@ def crowding_distance_assignment(front):
 	  #Calculate crowding distance by summing crow_dist from each of objectives
 	else:
 	  if(debug>5):
-	    print "\tcrowding_distance_assignment --> Division by zero avoided!"
+	    print("\tcrowding_distance_assignment --> Division by zero avoided!")
 	  front[i].crow_dist += np.Inf
 	
     

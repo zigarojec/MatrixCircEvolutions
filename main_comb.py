@@ -22,6 +22,9 @@ from scoreFunctions import *
 from paramOptimizer import *
 from buildingBlocksBank import *
 
+if globalVars.MOEA:
+  from NSGAII import faster_nondominated_sort,crowding_distance_assignment,tournament_NSGA
+
 from utils import dynamic_module_import
 
 if __name__ == "__main__":
@@ -57,7 +60,7 @@ problems = {'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 
 PROBLEM = problems[PROBLEMname]
 """
-MOEAMODE = 0 # DO NOT CHANGE
+MOEAMODE = globalVars.MOEA 
 
 
 

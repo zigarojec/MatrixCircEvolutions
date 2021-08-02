@@ -27,6 +27,18 @@ from reproduction import *
 from NSGAII import faster_nondominated_sort,crowding_distance_assignment,tournament_NSGA
 from scoreFunctions import *
 from paramOptimizer import *
+from buildingBlocksBank import *
+
+
+from utils import dynamic_module_import
+
+if __name__ == "__main__":
+  module, PROBLEMCLASS = dynamic_module_import(PROBLEMpath + PROBLEMname, PROBLEMname)
+  PROBLEM = getattr(PROBLEMCLASS, PROBLEMname)
+  # module, PROBLEM = dynamic_module_import("scorefunctions.amplifiers.scoreCirc_commonEmitterAmp_resilenceMode", "scoreCirc_commonEmitterAmp_resilenceMode")
+
+
+
 
 #Other settings
 np.set_printoptions(threshold='nan', linewidth=1000)	#print whole matrix
@@ -34,8 +46,7 @@ np.set_printoptions(threshold='nan', linewidth=1000)	#print whole matrix
 random.seed(globalVars.seedN)	#Fixed seed
 np.random.seed(globalVars.seedN)
 #-define the cost function--------------------------
-#PROBLEM = scoreCirc_ActiveFilter_MOEA #IMPORTANT! Set this also in circuitUnderOptimiser function!
-
+"""
 problems = {'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    'scoreCirc_CmosVoltageReference_2':scoreCirc_CmosVoltageReference_2,
 	    'scoreCirc_PassiveBandPass':scoreCirc_PassiveBandPass,
@@ -43,9 +54,27 @@ problems = {'scoreCirc_ActiveFilter_2':scoreCirc_ActiveFilter_2,
 	    } #set this also in paramOptimizer
 
 PROBLEM = problems[globalVars.PROBLEMname]
+"""
+
 MOEAMODE = 1 # DO NOT CHANGE
 
 sys.setrecursionlimit(5000)
+
+
+# Listener thread for intermediate STOPPING
+def check_input():
+    print("Starting listener thread. Type STOP if you want to end the algorithm gently.")
+    while True:
+        if os.path.exists("./STOP"):
+          print("Exiting.")
+          break
+        _in = input()
+        print("received input: " + _in)
+        if _in.lower() == "stop":
+            os.mknod("./STOP")  # Creates stop file. 
+            break
+
+
 
 
 if __name__=='__main__':

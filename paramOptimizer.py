@@ -5,7 +5,7 @@ Ziga Rojec, EDA group, Faculty of Electrical Engineering, University of Ljubljan
 This script is used by the additional method, that optimizes numerical parameters of a single topology. This is used when optimize is set to 1 in globalVars.py.
 
 """
-import dill
+#import dill
 
 
 from utils import circuit, slimCircuit
