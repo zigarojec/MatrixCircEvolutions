@@ -25,18 +25,18 @@ def fast_nondominated_sort(popu):
     for other_individual in popu:   
       if (min(individual.objectivesScore <= other_individual.objectivesScore)==1 and
 	  sum(individual.objectivesScore < other_individual.objectivesScore)>=1):
-	#individual.dominatesThose = np.append(individual.dominatesThose, other_individual) 
-	individual.dominatesThose.append(other_individual) #TESTING
-	#print "individual dominates"
-	c1 += 1
+        #individual.dominatesThose = np.append(individual.dominatesThose, other_individual) 
+        individual.dominatesThose.append(other_individual) #TESTING
+        #print("individual dominates")
+        c1 += 1
       elif (min(other_individual.objectivesScore <= individual.objectivesScore)==1 and
 	sum(other_individual.objectivesScore < individual.objectivesScore)>=1):
-	individual.isDominatedByThatMany += 1
-	c2 += 1
-	#print "other dominates"
+        individual.isDominatedByThatMany += 1
+        c2 += 1
+        #print("other dominates")
       c3 += 1
     if individual.isDominatedByThatMany == 0:
-      #print popu.fronts
+      #print(popu.fronts)
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time() 
@@ -47,10 +47,10 @@ def fast_nondominated_sort(popu):
     temp = []
     for individual in popu.fronts[i]:
       for other_individual in individual.dominatesThose:
-	other_individual.isDominatedByThatMany -= 1
-	if other_individual.isDominatedByThatMany == 0:
-	  other_individual.rank = i+1
-	  temp.append(other_individual)
+        other_individual.isDominatedByThatMany -= 1
+        if other_individual.isDominatedByThatMany == 0:
+          other_individual.rank = i+1
+          temp.append(other_individual)
     i = i+1
     popu.fronts.append(temp)
    
@@ -84,21 +84,21 @@ def faster_nondominated_sort(popu):
 	  (individual.objectivesScore[0] < other_individual.objectivesScore[0] or 	#---
 	   individual.objectivesScore[1] < other_individual.objectivesScore[1] or 	#  |
 	   individual.objectivesScore[2] < other_individual.objectivesScore[2])): 	#---
-	individual.dominatesThose.append(other_individual) #TESTING
-	#print "individual dominates"
-	c1 += 1
+        individual.dominatesThose.append(other_individual) #TESTING
+        #print("individual dominates")
+        c1 += 1
       elif ((other_individual.objectivesScore[0] <= individual.objectivesScore[0] and   #---
 	   other_individual.objectivesScore[1] <= individual.objectivesScore[1] and     #  |
 	   other_individual.objectivesScore[2] <= individual.objectivesScore[2]) and    #---
 	  (other_individual.objectivesScore[0] < individual.objectivesScore[0] or       #---
 	   other_individual.objectivesScore[1] < individual.objectivesScore[1] or       #  |
 	   other_individual.objectivesScore[2] < individual.objectivesScore[2])):       #---
-	individual.isDominatedByThatMany += 1
-	c2 += 1
-	#print "other dominates"
+        individual.isDominatedByThatMany += 1
+        c2 += 1
+        #print("other dominates")
       c3 += 1
     if individual.isDominatedByThatMany == 0:
-      #print popu.fronts
+      #print(popu.fronts)
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time() 
@@ -109,10 +109,10 @@ def faster_nondominated_sort(popu):
     temp = []
     for individual in popu.fronts[i]:
       for other_individual in individual.dominatesThose:
-	other_individual.isDominatedByThatMany -= 1
-	if other_individual.isDominatedByThatMany == 0:
-	  other_individual.rank = i+1
-	  temp.append(other_individual)
+        other_individual.isDominatedByThatMany -= 1
+        if other_individual.isDominatedByThatMany == 0:
+          other_individual.rank = i+1
+          temp.append(other_individual)
     i = i+1
     popu.fronts.append(temp)
    
@@ -148,8 +148,8 @@ def faster_nondominated_sort2(popu):
 
     for other_individual in popu:
       if (all([i<=oi for i, oi in zip(individual.objectivesScore, other_individual.objectivesScore)])
-	  and
-	  any([i<oi for i, oi in zip(individual.objectivesScore, other_individual.objectivesScore)])):
+        and
+        any([i<oi for i, oi in zip(individual.objectivesScore, other_individual.objectivesScore)])):
         individual.dominatesThose.append(other_individual)
       elif ((other_individual.objectivesScore[0] <= individual.objectivesScore[0] and   #---
            other_individual.objectivesScore[1] <= individual.objectivesScore[1] and     #  |
@@ -159,10 +159,10 @@ def faster_nondominated_sort2(popu):
            other_individual.objectivesScore[2] < individual.objectivesScore[2])):       #---
         individual.isDominatedByThatMany += 1
         c2 += 1
-        #print "other dominates"
+        #print("other dominates")
       c3 += 1
     if individual.isDominatedByThatMany == 0:
-      #print popu.fronts
+      #print(popu.fronts)
       popu.fronts[0].append(individual)
       individual.rank = 0
   stw1 = time()
@@ -193,15 +193,15 @@ def crowding_distance_assignment(front):
       front[0].crow_dist = np.Inf	#side objects of the front are assigned crowding distance being Inf
       front[l-1].crow_dist = np.Inf   
       for i in range(2, l-1):
-	#print front[i+1].objectivesScore[m], front[i-1].objectivesScore[m], front[l-1].objectivesScore[m], front[0].objectivesScore[m]
-	if front[l-1].objectivesScore[m]-front[0].objectivesScore[m] != 0:
-	  front[i].crow_dist += ((front[i+1].objectivesScore[m]-front[i-1].objectivesScore[m])/
-			      (front[l-1].objectivesScore[m]-front[0].objectivesScore[m]))
-	  #Calculate crowding distance by summing crow_dist from each of objectives
-	else:
-	  if(debug>5):
-	    print("\tcrowding_distance_assignment --> Division by zero avoided!")
-	  front[i].crow_dist += np.Inf
+        #print(front[i+1].objectivesScore[m], front[i-1].objectivesScore[m], front[l-1].objectivesScore[m], front[0].objectivesScore[m])
+        if front[l-1].objectivesScore[m]-front[0].objectivesScore[m] != 0:
+          front[i].crow_dist += ((front[i+1].objectivesScore[m]-front[i-1].objectivesScore[m])/
+                  (front[l-1].objectivesScore[m]-front[0].objectivesScore[m]))
+          #Calculate crowding distance by summing crow_dist from each of objectives
+        else:
+          if(debug>5):
+            print("\tcrowding_distance_assignment --> Division by zero avoided!")
+          front[i].crow_dist += np.Inf
 	
     
 def crowding_comparator(individual, other_individual):
@@ -216,20 +216,20 @@ def crowding_comparator(individual, other_individual):
 def tournament_NSGA(generation, tournamentSize):
   """NonDominant CrowdingDistance awared tournament."""
   
-  #print "\t-------Tournament"
+  #print("\t-------Tournament")
   tour_Pool = []
   best = None
   
-  #print len(generation.pool)
+  #print(len(generation.pool))
   #select several
   for i in range(0,tournamentSize):
     tour_Pool.append(generation.pool[random.randint(0,len(generation.pool)-1)])  
-  #print "\t Individuals:", tour_Pool
+  #print("\t Individuals:", tour_Pool)
   for individual in tour_Pool:
     if best is None or crowding_comparator(individual, best) == 1:
       best = individual
-  #print "\t Tournament best:", best
+  #print("\t Tournament best:", best)
   
-  #print "\t-------Tournament end"
+  #print("\t-------Tournament end")
   return best
 

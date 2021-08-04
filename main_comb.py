@@ -118,7 +118,8 @@ if __name__=='__main__':
   }))
   
   generationNum = 0
-  generations = []
+  optimizedIndivids = [] 	#PSADE parameter-optimized individuals
+
   
   hotGen = population() #hot generation (current)
   oldGen = population() #previous generation (old)
@@ -177,180 +178,350 @@ if __name__=='__main__':
   listener_thread.start()
   
   #Parallel!! :)
-  results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0,len(hotGen.pool))), remote=True)
+  results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, globalVars.MOEA]) for i in range(0,len(hotGen.pool))), remote=True)
   results = np.array(results)
   
+  if globalVars.MOEA:
+    #Put together objects and objectivesScores
+    for i in range(0,len(hotGen.pool)):
+      hotGen.pool[i].objectivesScore = np.transpose(results[:,0])[i]
+
+
   stw1 = time()
   print("Evaluation of initial population lasted for %f s" %(stw1-stw0))
-  #input("Tisni!")
 
-  hotGen.scores = np.transpose(results[:,0])
-  #hotGen.matrixDensities = np.transpose(results[:,1])
-  #hotGen.matrixQuaziIDs = np.transpose(results[:,2])
-  
-  #Sort population
-  sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
-  currentBestScore = hotGen.scores[sortedPool_Indices[0]]
+#Sort population
+  if globalVars.MOEA:
+    staSort = time()
+    faster_nondominated_sort(hotGen)
+    endSort = time()
+    print("Fast_nondominated_sort finished in %.2f s." %(endSort-staSort))
+    for i in range(0, len(hotGen.fronts)):
+      crowding_distance_assignment(hotGen.fronts[i])
+    print("Crowding_distance_assignment finished.")
+  else:
+    hotGen.scores = np.transpose(results[:,0])
+    #hotGen.matrixDensities = np.transpose(results[:,1])
+    #hotGen.matrixQuaziIDs = np.transpose(results[:,2])
+    
+    #Sort population
+    sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
+    currentBestScore = hotGen.scores[sortedPool_Indices[0]]
   
   #najboljsi v generaciji je...
   print(":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore))
   
-  printer(results[sortedPool_Indices[0]], stw0, generationNum, problem=PROBLEMname, resultspath = datadirname)
-  bestScoresList.append(hotGen.scores[sortedPool_Indices[0]])
+  if globalVars.MOEA:
+    None
+  else:
+    printer(results[sortedPool_Indices[0]], stw0, generationNum, problem=PROBLEMname, resultspath = datadirname)
+    bestScoresList.append(hotGen.scores[sortedPool_Indices[0]])
   averageScoresList.append(np.average(hotGen.scores))
   
-  DONE = 0
-  while DONE == 0:
-    generationNum = generationNum + 1	#risen the generations counter
+  while globalVars.DONE == 0:
+    generationNum += 1	#rise the generations counter
+
     oldGen = deepcopy(hotGen)
     hotGen = population() #hot generation (current) initialization
     
-    #generations.append(population(generationNum))		#append new generation instance to a list
+    if globalVars.MOEA:
+      ##############
+      #### MOEA ####
+      aa = []
+      bb = []
+      tempPool = population()
+      offspring = []
+      for i in range(0, int(globalVars.POP_SIZE/2)):
+        parent1 = tournament_NSGA(oldGen, globalVars.tournamentSize)
+        #parent1 = deepcopy(oldGen.pool[np.random.randint(0,len(oldGen.pool))])
+        parent2 = parent1
+        while parent1.reduMtrxHash == parent2.reduMtrxHash:
+          parent2 = tournament_NSGA(oldGen, globalVars.tournamentSize)
+          #parent2 = deepcopy(oldGen.pool[np.random.randint(0,len(oldGen.pool))])
+          #print "duplicant found 1x"
+        bb.append(parent1)
+        bb.append(parent2)
+        twoChildren = geneticOperation3(parent1, parent2, generationNum)
+        for j in range(0, len(twoChildren)):
+          offspring.append(copy(twoChildren[j]))
     
-    #set up mating pool - tournament
-    matingPool, mP_SortedIndices = tournament(oldGen, NofElite, tournamentSize, POP_SIZE, sortedPool_Indices)
-    
-    tempPool = population()
-    for i in range(0, len(mP_SortedIndices)//2):
-      parent1 = matingPool.pool[i]
-      parent2 = matingPool.pool[random.randint(len(mP_SortedIndices)//2,len(mP_SortedIndices)-1)]
-      family = geneticOperation(parent1, parent2, generationNum)
-      for j in range(0, len(family.pool)):
-        tempPool.add_individual(family.pool[j])
-    
-    #dispach creating of full redundance in circuit matrices
-    individuals = cOS.dispatch(jobList=((dispatchCircuitObjectGeneration, [tempPool.pool[i], i]) for i in range(0,len(tempPool.pool))), remote=True)
-    for i in range(0,len(tempPool.pool)):
-        # WATCH Here add gennum ind num to individual object
-        individuals[i].generationNum = generationNum
-        individuals[i].individualNum = i
-        tempPool.pool[i] = individuals[i]
-   
-    #remove duplicated individuals created during evolution----------------
-    #Warning. When optimizing ValueVector, duplicates are not among circuits with same topology!
-    tempPool_hashes = []	##every tempPool individual gets a hash
-    
-    for i in range(0, len(tempPool.pool)):
-      #tempPool_hashes.append(hash(tempPool.pool[i].BigCircuitMatrix.tostring()) + hash(tempPool.pool[i].ValueVector.tostring())) #TEST: getting hash of FULL MATRIX
-      tempPool_hashes.append(hash(tempPool.pool[i].fullRedundancyMatrix.tostring()))# + hash(tempPool.pool[i].ValueVector.tostring())) #TEST: getting hash of FULL MATRIX
+      #if twoChildren[j].mtrxHash not in aa:
+      #  aa.append(twoChildren[j].mtrxHash)
+      #else:
+      #  print("This topology is alredy in children.")
 
-    dups = collections.defaultdict(list)
-    for i, item in enumerate(tempPool_hashes):
-      dups[item].append(i)
-    
-    uniqateI = []
-    for i in set(tempPool_hashes):
-      uniqateI.append(dups[i][0])
-    
-    temptempPool = deepcopy(tempPool.pool)
-    tempPool.pool = []
-    
-    for i in uniqateI:
-      tempPool.add_individual(temptempPool[i])
-    #----------------------------------------------------------------------
-    
-    #Evaluate the big temporary pool, sort results and append to current generation
-    results=cOS.dispatch(jobList=((PROBLEM, [tempPool.pool[i], generationNum, i, False]) for i in range(0,len(tempPool.pool))), remote=True)
-    results = np.array(results)
-	
-    tempPool.scores = np.append(tempPool.scores,np.transpose(results[:,0]))
-    #tempPool.matrixDensities = np.append(tempPool.matrixDensities,np.transpose(results[:,1]))
-    #tempPool.matrixQuaziIDs = np.append(tempPool.matrixQuaziIDs , np.transpose(results[:,2]))
-    #Sort population
-    sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
-
-    #-------------#      
-    #--OPTIMISE SOME OF BEST AND TAKE THEM WITH YOU--#
-    
-    bSL_npA = np.array(bestScoresList)
-    deltaScore = abs(np.average(bSL_npA[-10:])-tempPool.scores[sortedTempPool_Indices[0]])
-    
-    #if (optimise == True) & (currentBestScore < 300) & ((currentBestScore < 100) | (deltaScore < 1.0)) & (not generationNum%20):
-    if (optimise == True) & (((generationNum > 30) & (deltaScore < 1e-1) & (not generationNum%20)) | (generationNum < 2)):
-      bestToOptimise = [0, random.randint(1,NofElite), random.randint(NofElite+1, 10*NofElite)]
-      if generationNum < 2:
-        bestToOptimise = [0] #in first generation optimise just adam!
-     
-      for i in bestToOptimise:
-        topology = copy(tempPool.pool[sortedTempPool_Indices[i]].BigCircuitMatrix)
-        values = copy(tempPool.pool[sortedTempPool_Indices[i]].ValueVector)
-
-        print("Circuit ", i, "from gen", generationNum, "...")
-        maxiter = 300 if generationNum < 100 else 8000
-        x, f = optimiseCircuit(topology, values, maxiter)
-        tempPool.pool = np.append(deepcopy(circuit(topology, x)), tempPool.pool)
-        tempPool.pool[0] = dispatchCircuitObjectGeneration(tempPool.pool[0],0)
-        
-        tempPool.scores = np.append(copy(np.float64(f)),tempPool.scores)
-        #tempPool.matrixDensities = np.append(copy(tempPool.matrixDensities[sortedTempPool_Indices[i]]), tempPool.matrixDensities)
-        #tempPool.matrixQuaziIDs = np.append(copy(tempPool.matrixQuaziIDs[sortedTempPool_Indices[i]]), tempPool.matrixQuaziIDs)
-        
-        #sort them again
-        sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
-        sortedTempPool_Indices = list(sortedTempPool_Indices)
-    
-    #-------------#  
+      #append all PSADE optimized to offspring
+      if len(optimizedIndivids) > 0:
+        for i in optimizedIndivids:
+          offspring.append(i)
 
 
-    #adjust NofRANDOMS
-    if len(tempPool.pool) < (POP_SIZE - NofRANDOMS):
-      NofRANDOMS = POP_SIZE - len(tempPool.pool)    
-
-    #adding random new individuals"
-    indN = len(hotGen.pool)
-    
-    NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,NofRANDOMS)), remote=True)
-    for i in range(0,NofRANDOMS):
-      hotGen.pool = np.append(hotGen.pool, deepcopy(NEWindividuals[i]))
+      #clean the offspring of duplicates immediately
+      #	-cleaning by matrix - 		"mtrxHash"
+      #	-cleaning by topology - 	"reduMtrxHash"
+      #	-cleaning by circuit - 		"fullHash"
+      print("Offspring len before cleaning:", len(offspring))
+      offspring = removeDuplicatesFromArrayByAttribute(offspring, "fullHash")
+      print("Offspring len after cleaning:", len(offspring))
       
-    #for i in range(0, NofRANDOMS):
-    #  mutant = createRandomBigCircuitMatrix(copy(createRandomValueVector()))
-    #  hotGen.pool = np.append(hotGen.pool, deepcopy(mutant))
+      for i in range(0,len(offspring)):
+        # WATCH Here add gennum ind num to individual object
+        offspring[i].generationNum = generationNum
+        offspring[i].individualNum = i
 
-    #evaluate randoms
-    results = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0, NofRANDOMS)), remote=True)
-    #sort results
-    results = np.array(results)
-    hotGen.scores = np.append(hotGen.scores, copy(np.transpose(results[:,0])))
-    #hotGen.matrixDensities = np.append(hotGen.matrixDensities, copy(np.transpose(results[:,1])))
-   # hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, copy(np.transpose(results[:,2])))
 
-    #adding randoms and offspring together
-    hotGen.pool = np.append(hotGen.pool, tempPool.pool[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-    hotGen.scores = np.append(hotGen.scores, tempPool.scores[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-    #hotGen.matrixDensities = np.append(hotGen.matrixDensities, tempPool.matrixDensities[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-    #hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, tempPool.matrixQuaziIDs[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-    #sort all
-    sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
-    currentBestScore = float(hotGen.scores[sortedPool_Indices[0]])
-    bestScoresList.append(currentBestScore)
-    averageScoresList.append(np.average(np.sort(hotGen.scores)[:(POP_SIZE-NofRANDOMS)]))
+      #Evaluate the offspring - parents were already evaluated in ngen-1
+      results=cOS.dispatch(jobList=((PROBLEM, [offspring[i], generationNum, i, True]) for i in range(0,len(offspring))), remote=True)
+      results = np.array(results)
+      
+      #Put together objects and objectivesScores
+      for i in range(0,len(offspring)):
+        offspring[i].objectivesScore = np.transpose(results[:,0])[i]
+          
+      #Put together evaluated offspring and parents. After that, you perform non dominant sorting.
+      for i in range(0, globalVars.POP_SIZE):
+        tempPool.add_individual(copy(oldGen.pool[i]))
+      for i in range(0, len(offspring)):
+        tempPool.add_individual(copy(offspring[i]))
+        #print(offspring[i].objectivesScore)
+        #print(offspring[i].reduMtrxHash)
+      if generationNum > 2:# and debug > 1:
+        print("tempPool len before cleaning:", len(tempPool.pool))
+        tempPool.pool = removeDuplicatesFromArrayByAttribute(tempPool.pool, "scoreHash")     
+        print("tempPool len after cleaning:", len(tempPool.pool)) 
+      
+      
+      #Sort population - fast-non-dominant sorting
+      staSort = time()
+      faster_nondominated_sort(tempPool)
+      endSort = time()
+      print("Fast_nondominated_sort finished in %.2fs." %(endSort-staSort))
+      
+      for i in range(0, len(tempPool.fronts)):
+        #print "Front No:", i
+        crowding_distance_assignment(tempPool.fronts[i])
+      print("Crowding_distance_assignment finished.")
+      #raw_input("Fast_nondominated_sort of gen"+str(generationNum)+" finished.")
+      
+      #Fill the new generation. First fronts first, better with greater crowding distance. 
+      notFull = 1
+      frontCount = 0
+      while notFull:
+        tempPool.fronts[frontCount].sort(key=lambda x: x.crow_dist, reverse=True)#sort the objects in fornt according to crowding distance
+        for i in tempPool.fronts[frontCount]:
+          hotGen.add_individual(copy(i))
+          if len(hotGen.pool) == globalVars.POP_SIZE:
+            notFull = 0
+            break
+        frontCount+=1
+      #raw_input("Finished appending new population.")
+      
+      #for the case of diversity - checking hashes of all data
+      a = []
+      for i in tempPool.fronts[0]:
+        a.append(np.array(i.objectivesScore).tostring())
+      b = []
+      for i in tempPool.fronts[0]:
+        b.append(hash(i.fullRedundancyMatrix.tostring()))
+      c = []
+      for i in tempPool.fronts[0]:
+        c.append(i.valuHash)
+      d = []
+      for i in tempPool.fronts[0]:
+        d.append(i.fullHash)
+      firstFlen = len(tempPool.fronts[0])
+      #### END MOEA ####
+      ##################
+
+    else:
+      ##################
+      #### Basic EA ####
+
+      #set up mating pool - tournament
+      matingPool, mP_SortedIndices = tournament(oldGen, NofElite, tournamentSize, POP_SIZE, sortedPool_Indices)
+      
+      tempPool = population()
+      for i in range(0, len(mP_SortedIndices)//2):
+        parent1 = matingPool.pool[i]
+        parent2 = matingPool.pool[random.randint(len(mP_SortedIndices)//2,len(mP_SortedIndices)-1)]
+        family = geneticOperation(parent1, parent2, generationNum)
+        for j in range(0, len(family.pool)):
+          tempPool.add_individual(family.pool[j])
+      
+      #dispach creating of full redundance in circuit matrices
+      individuals = cOS.dispatch(jobList=((dispatchCircuitObjectGeneration, [tempPool.pool[i], i]) for i in range(0,len(tempPool.pool))), remote=True)
+      for i in range(0,len(tempPool.pool)):
+          # WATCH Here add gennum ind num to individual object
+          individuals[i].generationNum = generationNum
+          individuals[i].individualNum = i
+          tempPool.pool[i] = individuals[i]
     
+      #remove duplicated individuals created during evolution----------------
+      #clean the offspring of duplicates immediately
+      #	-cleaning by matrix - 		"mtrxHash"
+      #	-cleaning by topology - 	"reduMtrxHash"
+      #	-cleaning by circuit - 		"fullHash"
+      print("TempPool len before cleaning:", len(tempPool))
+      tempPool = removeDuplicatesFromArrayByAttribute(tempPool, "fullHash")
+      print("TempPool len after cleaning:", len(tempPool))
+      #----------------------------------------------------------------------
+      
+      #Evaluate the big temporary pool, sort results and append to current generation
+      results=cOS.dispatch(jobList=((PROBLEM, [tempPool.pool[i], generationNum, i, False]) for i in range(0,len(tempPool.pool))), remote=True)
+      results = np.array(results)
     
-    #if int(currentBestScore) > int(min(bestScoresList)): #Jao dzubre kaj si blesav!
-    #  print "Something went wrong BADLY."
-    #  print bestScoresList
-    # input()
+      tempPool.scores = np.append(tempPool.scores,np.transpose(results[:,0]))
+      #tempPool.matrixDensities = np.append(tempPool.matrixDensities,np.transpose(results[:,1]))
+      #tempPool.matrixQuaziIDs = np.append(tempPool.matrixQuaziIDs , np.transpose(results[:,2]))
+      #Sort population
+      sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
+
+      #### END Basic EA ####
+      ######################
+
+    #Calculate time
+    stw1 = time()		
+    dtime = stw1-stw0
+    m, s = divmod(dtime, 60)
+    h, m = divmod(m, 60)
+
+    if globalVars.MOEA:
+      # Sort individulas according to distance from coordinate center
+      objectivesList = []
+      distxyz = []
+      distxyzI = []
+      for i in tempPool.pool:
+        distxyz.append(np.sqrt(i.objectivesScore[0]**2 + i.objectivesScore[1]**2 + i.objectivesScore[2]**2))
+      distxyzI = np.argsort(distxyz)
+        
+      currentBestScore = tempPool.pool[distxyzI[0]].objectivesScore
+      bestScoresList.append(currentBestScore)
+
+      #---OPTIMISE SOME OF BEST------------------------#
+      if (globalVars.optimise == True) & (generationNum > 0) & ((not generationNum%10) or (generationNum == 1 & globalVars.insertAdam == 1)):
+        bestToOptimise = [random.randint(0,globalVars.NofElite), random.randint(NofElite, 10*NofElite)]
+    
+        for i in bestToOptimise:
+          topology = copy(tempPool.pool[distxyzI[i]].BigCircuitMatrix)
+          values = copy(tempPool.pool[distxyzI[i]].ValueVector)
+          print("PSADE on circuit ", i, "from gen", generationNum, "...")
+          maxiter = 3000 if generationNum < 100 else 8000
+          x, f = optimiseCircuit(topology, values, maxiter)
+          optimizedIndivids.append(copy(circuit(topology, x)))
+          
+      #append those individuals to the NEXT generation!!
+      else:
+        optimizedIndivids = []
+      #------------------------------------------------#  
+    else: #not globalVars.MOEA    
+      #--OPTIMISE SOME OF BEST AND TAKE THEM WITH YOU--#
+      
+      bSL_npA = np.array(bestScoresList)
+      deltaScore = abs(np.average(bSL_npA[-10:])-tempPool.scores[sortedTempPool_Indices[0]])
+      
+      #if (optimise == True) & (currentBestScore < 300) & ((currentBestScore < 100) | (deltaScore < 1.0)) & (not generationNum%20):
+      if (optimise == True) & (((generationNum > 30) & (deltaScore < 1e-1) & (not generationNum%20)) | (generationNum < 2)):
+        bestToOptimise = [0, random.randint(1,NofElite), random.randint(NofElite+1, 10*NofElite)]
+        if generationNum < 2:
+          bestToOptimise = [0] #in first generation optimise just adam!
+      
+        for i in bestToOptimise:
+          topology = copy(tempPool.pool[sortedTempPool_Indices[i]].BigCircuitMatrix)
+          values = copy(tempPool.pool[sortedTempPool_Indices[i]].ValueVector)
+
+          print("Circuit ", i, "from gen", generationNum, "...")
+          maxiter = 300 if generationNum < 100 else 8000
+          x, f = optimiseCircuit(topology, values, maxiter)
+          tempPool.pool = np.append(deepcopy(circuit(topology, x)), tempPool.pool)
+          tempPool.pool[0] = dispatchCircuitObjectGeneration(tempPool.pool[0],0)
+          
+          tempPool.scores = np.append(copy(np.float64(f)),tempPool.scores)
+          #tempPool.matrixDensities = np.append(copy(tempPool.matrixDensities[sortedTempPool_Indices[i]]), tempPool.matrixDensities)
+          #tempPool.matrixQuaziIDs = np.append(copy(tempPool.matrixQuaziIDs[sortedTempPool_Indices[i]]), tempPool.matrixQuaziIDs)
+          
+          #sort them again
+          sortedTempPool_Indices = np.argsort(tempPool.scores, kind='mergesort')
+          sortedTempPool_Indices = list(sortedTempPool_Indices)
+      
+          #-------------#  
+
+        #adjust NofRANDOMS
+        if len(tempPool.pool) < (POP_SIZE - NofRANDOMS):
+          NofRANDOMS = POP_SIZE - len(tempPool.pool)    
+
+        #adding random new individuals"
+        indN = len(hotGen.pool)
+        
+        NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,NofRANDOMS)), remote=True)
+        for i in range(0,NofRANDOMS):
+          hotGen.pool = np.append(hotGen.pool, deepcopy(NEWindividuals[i]))
+          
+        #for i in range(0, NofRANDOMS):
+        #  mutant = createRandomBigCircuitMatrix(copy(createRandomValueVector()))
+        #  hotGen.pool = np.append(hotGen.pool, deepcopy(mutant))
+
+        #evaluate randoms
+        results = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0, NofRANDOMS)), remote=True)
+        #sort results
+        results = np.array(results)
+        hotGen.scores = np.append(hotGen.scores, copy(np.transpose(results[:,0])))
+        #hotGen.matrixDensities = np.append(hotGen.matrixDensities, copy(np.transpose(results[:,1])))
+      # hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, copy(np.transpose(results[:,2])))
+
+        #adding randoms and offspring together
+        hotGen.pool = np.append(hotGen.pool, tempPool.pool[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+        hotGen.scores = np.append(hotGen.scores, tempPool.scores[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+        #hotGen.matrixDensities = np.append(hotGen.matrixDensities, tempPool.matrixDensities[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+        #hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, tempPool.matrixQuaziIDs[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+        #sort all
+        sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
+        currentBestScore = float(hotGen.scores[sortedPool_Indices[0]])
+        bestScoresList.append(currentBestScore)
+        averageScoresList.append(np.average(np.sort(hotGen.scores)[:(POP_SIZE-NofRANDOMS)]))
+        
+      
     
     #---Saving results, picle, ...  and so on----#
 
     #Evaluate best one together with results for plotting
-    WinnerResults = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[sortedPool_Indices[0]], generationNum, 0, False]) for i in range(1,2)), remote=True)
-    WinnerResults = np.array(WinnerResults)[0]
+    if globalVars.MOEA:
+      plotThisMany = 4
+      WinnerResults = cOS.dispatch(jobList=((PROBLEM, [tempPool.pool[distxyzI[i]], generationNum, 0, True]) for i in range(0,plotThisMany)), remote=True)
+      WinnerResults = np.array(WinnerResults)
+    else: #not globalVars.MOEA
+      WinnerResults = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[sortedPool_Indices[0]], generationNum, 0, False]) for i in range(1,2)), remote=True)
+      WinnerResults = np.array(WinnerResults[0])
     
+
     printer(WinnerResults, stw0, generationNum, problem = PROBLEMname, resultspath = datadirname) # prints the score and results summary
 
+    if globalVars.MOEA:
+      print("\t - Unique of scores:",len(set(a)),"(/",firstFlen, "), of topologies:",len(set(b)),"(/",firstFlen, "), \n\t          of values:", len(set(c)),"(/",firstFlen, "), of individuals", len(set(d)),"(/",firstFlen, ") in 1st front.")
+      print("\t- - - - - - - - - - - - - - - - - - - - - - - - - - ")
 
     #Write winner netlist to a directiory of current run for inspection and manual simulation 
     os.chdir("../_MAIN_data")
     os.chdir("data_" + startdate + "_" + starttime)
-    fullRedMx = fullRedundancyBigCircuitMatrix(deepcopy(hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix))
-    makeNetlist_netlister(deepcopy(hotGen.pool[sortedPool_Indices[0]]))
+    #fullRedMx = fullRedundancyBigCircuitMatrix(deepcopy(hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix))
+    if globalVars.MOEA:
+      writeThisMany = 4
+      for i in range(0, writeThisMany):
+        makeNetlist_netlister(tempPool.pool[distxyzI[i]])
+
+        allObjectiveValues = hotGen.pool[0].objectivesScore		#getting all objective values of hotGen for plotting
+        for i in range(1, len(hotGen.pool)):
+          allObjectiveValues = np.vstack((allObjectiveValues, hotGen.pool[i].objectivesScore))
+        #DUMP results for plotting
+        data = [tempPool, generationNum, bestScoresList, WinnerResults, None, datadirname, BigMatrixSize, globalVars.POP_SIZE, averageScoresList, allObjectiveValues]
+    else:
+      makeNetlist_netlister(deepcopy(hotGen.pool[sortedPool_Indices[0]]))
+
+      #DUMP results for plotting
+      data = [hotGen, generationNum, bestScoresList, WinnerResults, sortedPool_Indices[0], datadirname, BigMatrixSize, POP_SIZE, averageScoresList]
+
     os.chdir("../") 
 
-    #DUMP results for plotting
-    data = [hotGen, generationNum, bestScoresList, WinnerResults, sortedPool_Indices[0], datadirname, BigMatrixSize, POP_SIZE, averageScoresList]
-    #with open("data.pkl","wb") as output:
+
     with open(datadirname + "/backdata.pkl","wb") as output:
       pickle.dump(data, output)
     output.close()
@@ -360,9 +531,16 @@ if __name__=='__main__':
     
     os.chdir(working_directory_path)
     #End of evolution? :
-    if (generationNum > (endingGenNum-1)) or (currentBestScore < minimalScore) or os.path.exists("./STOP"):
-      DONE = 1
-      makeNetlist_netlister(hotGen.pool[sortedPool_Indices[0]])
+    if globalVars.MOEA:
+      stopCondition = (generationNum > (endingGenNum-1)) or (currentBestScore[0] < minimalScore) or os.path.exists("./STOP")
+    else:
+      stopCondition = (generationNum > (endingGenNum-1)) or (currentBestScore < minimalScore) or os.path.exists("./STOP")
+    if stopCondition:
+      globalVars.DONE = 1
+      if globalVars.MOEA:
+        makeNetlist_netlister(tempPool.fronts[0][0])
+      else:
+        makeNetlist_netlister(hotGen.pool[sortedPool_Indices[0]])
       #print hotGen.pool[sortedPool_Indices[0]].BigCircuitMatrix
       
   

@@ -413,11 +413,18 @@ def printer(results, stw0, generationNum, **kwargs):
   m, s = divmod(dtime, 60)
   h, m = divmod(m, 60) 
   
-  currentBestScore = results[0]
-  
+  if MOEA:
+    currentBestScore = results[0][0]
+  else:
+    currentBestScore = results[0]
+
+
   # Common output:
-  stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE: " + f"{currentBestScore:.4E}" + " Time: "+f"{h:.0f}"+"h "+f"{m:.0f}" +"m " + f"{s:.2f}" + "s"
-  
+  #stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE: " + f"{currentBestScore:.4E}" + " Time: "+f"{h:.0f}"+"h "+f"{m:.0f}" +"m " + f"{s:.2f}" + "s"
+  #stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE: " + " ".join(f"{objective:+.2e}" for objective in currentBestScore) + " Time: "+f"{h:.0f}"+"h "+f"{m:.0f}" +"m " + f"{s:.2f}" + "s"
+  stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE: " + str(currentBestScore) + " Time: "+f"{h:.0f}"+"h "+f"{m:.0f}" +"m " + f"{s:.2f}" + "s"
+  #" ".join(f"{r:+.2e}" for objective in currentBestScore)
+
   if kwargs['problem']=='scoreCirc_HighPass':
     #stdoutstring += "\n:::GENERATION " + str(generationNum) + " - BEST ONE::: " +str(currentBestScore) + " Time: "+str(s)+"h "+str(m) +"m " + str(s) + "s"
     try:

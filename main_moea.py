@@ -80,13 +80,12 @@ def check_input():
 if __name__=='__main__':
   t0 = time()
 
-  print
-  print "++++++++++++++++++++++++++++++++++++++++++++"
-  print "+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n"
+  print()
+  print("+++	 MATRIX (R)EVOLUTIONS STARTED	+++\n")
   
   startdate = strftime("%Y_%m_%d")
   starttime = strftime("%H-%M")
-  print "Starting date: ", startdate, ", starting time: ", starttime
+  print("Starting date: ", startdate, ", starting time: ", starttime)
 
   os.chdir("../_MAIN_data")
   
@@ -125,7 +124,7 @@ if __name__=='__main__':
     with open("backdata.pkl","r") as pkl_file:
       data = pickle.load(pkl_file)
     pkl_file.close()
-    print "Ressurecting old population. Press any to proceed..."
+    print("Ressurecting old population. Press any to proceed...")
 
     hotGen = data[0]
     generationNum = 0#data[1]
@@ -138,18 +137,18 @@ if __name__=='__main__':
     averageScoresList = data[8]
     raw_input("...old population resurrected.")
   else:
-    print "Creating initial population. Press any to proceed..."
+    print("Creating initial population. Press any to proceed...")
     for i in range(0,globalVars.POP_SIZE):
       hotGen.add_individual(createRandomBigCircuitMatrix(copy(createRandomValueVector())))
     
     if globalVars.insertAdam:
       hotGen.pool[0] = AE.adam 	#Insert an already designed circuit to optimise.
       hotGen.pool[0].fullRedundancyMatrix = fullRedundancyBigCircuitMatrix(AE.adam.BigCircuitMatrix)
-      print "Adam-circuit inserted into population."
+      print("Adam-circuit inserted into population.")
     raw_input("...initial population created.")
   
   #---EVALUATE & SORT INITIAL POPULATION---# 
-  print "EVALUATING GENERATION %d" %generationNum
+  print("EVALUATING GENERATION %d" %generationNum)
   stw0 = time()
   results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, True]) for i in range(0,len(hotGen.pool))), remote=True)
   results = np.array(results)
@@ -159,19 +158,19 @@ if __name__=='__main__':
     hotGen.pool[i].objectivesScore = np.transpose(results[:,0])[i]
   
   stw1 = time()
-  print "Evaluation of initial population lasted for %f s" %(stw1-stw0)
+  print("Evaluation of initial population lasted for %f s" %(stw1-stw0))
   
   #Sort population
   staSort = time()
   faster_nondominated_sort(hotGen)
   endSort = time()
-  print "Fast_nondominated_sort finished in %.2f s." %(endSort-staSort)
+  print("Fast_nondominated_sort finished in %.2f s." %(endSort-staSort))
   for i in range(0, len(hotGen.fronts)):
     crowding_distance_assignment(hotGen.fronts[i])
   print("Crowding_distance_assignment finished.")
   
   #najboljsi v generaciji je...
-  print ":::GENERATION %04.d - BEST ONE::: %s ::YEAH!::" %(generationNum,hotGen.pool[0].objectivesScore)
+  print(":::GENERATION %04.d - BEST ONE::: %s ::YEAH!::" %(generationNum,hotGen.pool[0].objectivesScore))
   #bestScoresList.append(hotGen.scores[sortedPool_Indices[0]])
   averageScoresList.append(np.average(hotGen.scores))
   
@@ -191,33 +190,33 @@ if __name__=='__main__':
       #parent1 = deepcopy(oldGen.pool[np.random.randint(0,len(oldGen.pool))])
       parent2 = parent1
       while parent1.reduMtrxHash == parent2.reduMtrxHash:
-	parent2 = tournament_NSGA(oldGen, globalVars.tournamentSize)
-	#parent2 = deepcopy(oldGen.pool[np.random.randint(0,len(oldGen.pool))])
-	#print "duplicant found 1x"
+        parent2 = tournament_NSGA(oldGen, globalVars.tournamentSize)
+        #parent2 = deepcopy(oldGen.pool[np.random.randint(0,len(oldGen.pool))])
+        #print "duplicant found 1x"
       bb.append(parent1)
       bb.append(parent2)
       twoChildren = geneticOperation3(parent1, parent2, generationNum)
       for j in range(0, len(twoChildren)):
-	offspring.append(copy(twoChildren[j]))
+	      offspring.append(copy(twoChildren[j]))
 	
-	#if twoChildren[j].mtrxHash not in aa:
-	#  aa.append(twoChildren[j].mtrxHash)
-	#else:
-	#  print("This topology is alredy in children.")
+    #if twoChildren[j].mtrxHash not in aa:
+    #  aa.append(twoChildren[j].mtrxHash)
+    #else:
+    #  print("This topology is alredy in children.")
 
     #append all PSADE optimized to offspring
     if len(optimizedIndivids) > 0:
       for i in optimizedIndivids:
-	offspring.append(i)
+	      offspring.append(i)
 
 
     #clean the offspring of duplicates immediately
     #	-cleaning by matrix - 		"mtrxHash"
     #	-cleaning by topology - 	"reduMtrxHash"
     #	-cleaning by circuit - 		"fullHash"
-    print "Offspring len before cleaning:", len(offspring)
+    print("Offspring len before cleaning:", len(offspring))
     offspring = removeDuplicatesFromArrayByAttribute(offspring, "fullHash")
-    print "Offspring len after cleaning:", len(offspring)
+    print("Offspring len after cleaning:", len(offspring))
     
     #Evaluate the offspring - parents were already evaluated in ngen-1
     results=cOS.dispatch(jobList=((PROBLEM, [offspring[i], generationNum, i, True]) for i in range(0,len(offspring))), remote=True)
@@ -232,19 +231,19 @@ if __name__=='__main__':
       tempPool.add_individual(copy(oldGen.pool[i]))
     for i in range(0, len(offspring)):
       tempPool.add_individual(copy(offspring[i]))
-      #print offspring[i].objectivesScore
-      #print offspring[i].reduMtrxHash
+      #print(offspring[i].objectivesScore)
+      #print(offspring[i].reduMtrxHash)
     if generationNum > 2:# and debug > 1:
-      print "tempPool len before cleaning:", len(tempPool.pool)    
+      print("tempPool len before cleaning:", len(tempPool.pool))
       tempPool.pool = removeDuplicatesFromArrayByAttribute(tempPool.pool, "scoreHash")     
-      print "tempPool len after cleaning:", len(tempPool.pool)     
+      print("tempPool len after cleaning:", len(tempPool.pool)) 
     
     
     #Sort population - fast-non-dominant sorting
     staSort = time()
     faster_nondominated_sort(tempPool)
     endSort = time()
-    print "Fast_nondominated_sort finished in %.2fs." %(endSort-staSort)    
+    print("Fast_nondominated_sort finished in %.2fs." %(endSort-staSort))
     
     for i in range(0, len(tempPool.fronts)):
       #print "Front No:", i
@@ -258,10 +257,10 @@ if __name__=='__main__':
     while notFull:
       tempPool.fronts[frontCount].sort(key=lambda x: x.crow_dist, reverse=True)#sort the objects in fornt according to crowding distance
       for i in tempPool.fronts[frontCount]:
-	hotGen.add_individual(copy(i))
-	if len(hotGen.pool) == globalVars.POP_SIZE:
-	  notFull = 0
-	  break
+        hotGen.add_individual(copy(i))
+        if len(hotGen.pool) == globalVars.POP_SIZE:
+          notFull = 0
+          break
       frontCount+=1
     #raw_input("Finished appending new population.")
     
@@ -303,13 +302,13 @@ if __name__=='__main__':
       bestToOptimise = [random.randint(0,globalVars.NofElite), random.randint(NofElite, 10*NofElite)]
   
       for i in bestToOptimise:
-	  topology = copy(tempPool.pool[distxyzI[i]].BigCircuitMatrix)
-	  values = copy(tempPool.pool[distxyzI[i]].ValueVector)
-	  print "PSADE on circuit ", i, "from gen", generationNum, "..."
-	  maxiter = 3000 if generationNum < 100 else 8000
-	  x, f = optimiseCircuit(topology, values, maxiter)
-	  optimizedIndivids.append(copy(circuit(topology, x)))
-	  
+        topology = copy(tempPool.pool[distxyzI[i]].BigCircuitMatrix)
+        values = copy(tempPool.pool[distxyzI[i]].ValueVector)
+        print("PSADE on circuit ", i, "from gen", generationNum, "...")
+        maxiter = 3000 if generationNum < 100 else 8000
+        x, f = optimiseCircuit(topology, values, maxiter)
+        optimizedIndivids.append(copy(circuit(topology, x)))
+        
 	  #append those individuals to the NEXT generation!!
     else:
       optimizedIndivids = []
@@ -326,8 +325,8 @@ if __name__=='__main__':
     
     printer(WinnerResults[0], stw0, generationNum, problem = globalVars.PROBLEMname) #print results to screen
     
-    print "\t - Unique of scores:",len(set(a)),"(/",firstFlen, "), of topologies:",len(set(b)),"(/",firstFlen, "), \n\t          of values:", len(set(c)),"(/",firstFlen, "), of individuals", len(set(d)),"(/",firstFlen, ") in 1st front."
-    print "\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
+    print("\t - Unique of scores:",len(set(a)),"(/",firstFlen, "), of topologies:",len(set(b)),"(/",firstFlen, "), \n\t          of values:", len(set(c)),"(/",firstFlen, "), of individuals", len(set(d)),"(/",firstFlen, ") in 1st front.")
+    print("\t- - - - - - - - - - - - - - - - - - - - - - - - - - ")
     
     #Write winner netlist to a directiory of current run for inspection and manual simulation 
     os.chdir("../_MAIN_data")
@@ -344,6 +343,7 @@ if __name__=='__main__':
       allObjectiveValues = np.vstack((allObjectiveValues, hotGen.pool[i].objectivesScore))
     
     data = [tempPool, generationNum, bestScoresList, WinnerResults, None, datadirname, BigMatrixSize, globalVars.POP_SIZE, averageScoresList, allObjectiveValues]
+    
     with open(datadirname + "/backdata.pkl","wb") as output:
       pickle.dump(data, output)
     output.close()
@@ -358,6 +358,6 @@ if __name__=='__main__':
       
   
   cOS.finalize()
-  print "\n+++	 MATRIX EVOLUTIONS ENDED	 +++"
-  print "+++++++++++++++++++++++++++++++++++++++++++"
+  print("\n+++	 MATRIX EVOLUTIONS ENDED	 +++")
+  print("+++++++++++++++++++++++++++++++++++++++++++")
   

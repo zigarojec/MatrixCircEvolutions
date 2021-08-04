@@ -25,6 +25,9 @@ BigMatrixSize = data[6]
 POP_SIZE = data[7]
 averageScore = data[8]
 
+if GLOBAL.MOEA:
+  allObjectiveScores = data[9]
+
 datadirname = '../_MAIN_data/' + datadirname
 
 def diversityPlot_pLP(generation, generationNum, bestScoresList, result, bestI):
@@ -631,7 +634,11 @@ def squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, 
   
   #scoresPlt.hold(True)
   scoresPlt.set_title('Last generation\ncost values')
-  scoresPlt.semilogy(range(0,POP_SIZE), sorted(generation.scores), 'x', label='GenScores')
+  if GLOBAL.MOEA:
+    None
+    scoresPlt.semilogy(range(0,POP_SIZE), sorted(generation.scores), 'x', label='GenScores')
+  else:
+    scoresPlt.semilogy(range(0,POP_SIZE), sorted(generation.scores), 'x', label='GenScores')
   scoresPlt.grid(True)
   #scoresPlt.hold(False)
 
@@ -641,18 +648,27 @@ def squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, 
   mtrxDensPlt.grid(True)
   #mtrxDensPlt.hold(False)
 
-  #plot results (VOLTAGE REFERENCE)
   #try:
-  vdd_sweep1.set_title('Vout(Vin)')
+  vdd_sweep1.set_title('Err (Vin)')
   vdd_sweep1.set_ylabel('[V]')
   vdd_sweep1.set_xlabel('[V]')
-                        
+
+  
+  if not GLOBAL.robustMode:
+    target = np.sqrt(result[1]['scale']['nominal'])
+    vdd_sweep1.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+  else:
+    target = np.sqrt(result[1][0]['scale']['nominal'])
+    for r in result[1]:
+      vdd_sweep1.plot(r['scale']['nominal'], target-r['vout']['nominal'], '-')
+
+
   vdd_sweep2.set_title('Vout(Vin)')
   vdd_sweep2.set_ylabel('[V]')
   vdd_sweep2.set_xlabel('[V]')
   
   if not GLOBAL.robustMode:
-    vdd_sweep2.plot(result[1]['scale']['nominal'], np.sqrt(result[1]['scale']['nominal']), '.')
+    vdd_sweep2.plot(result[1]['scale']['nominal'], target, '.')
     vdd_sweep2.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
   else:
     vdd_sweep2.plot(result[1][0]['scale']['nominal'], np.sqrt(result[1][0]['scale']['nominal']), '.')
@@ -680,9 +696,120 @@ def squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, 
   
   #filterMtrxPlot.hold(True)
   filterMtrxPlot.set_title("Evolving circuit \nconnection matrix")
-  filterMtrxPlot.imshow(generation.pool[bestI].BigCircuitMatrix, interpolation='nearest', cmap=plt.cm.Blues)
+  #filterMtrxPlot.imshow(generation.pool[bestI].BigCircuitMatrix, interpolation='nearest', cmap=plt.cm.Blues)
+  filterMtrxPlot.imshow(generation.fronts[0][0].BigCircuitMatrix, interpolation='nearest', cmap=plt.cm.Blues)
   #filterMtrxPlot.hold(False)
 
+  
+  name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + ".png" #ploting every generation in separate file
+  plt.savefig(name)
+  name = datadirname + "/" + "generationPlot" + ".png"
+  plt.savefig(name)
+
+
+
+def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
+  """Plots a diversity in generation and evolution progress of Multi-Objective Evolutionary Process."""
+  
+  progress = np.array(bestScoresList)
+  allObjectiveScores = data[9]
+  
+  #sum a generation into single matrix
+  Msum = np.diag(np.zeros(BigMatrixSize,dtype=int),0)	
+  for i in generation.pool:
+	  Msum = Msum + i.BigCircuitMatrix
+  Msum = Msum - np.diag(len(generation.pool)*np.ones(BigMatrixSize,dtype=int),0)
+  # Plot window
+  fig = plt.figure(1, figsize=(14, 11), dpi=100, facecolor='w', edgecolor='k')
+  
+  # Create 4 subplots, 2x2
+  IDs=			plt.subplot2grid((3,4), (0,1))
+  mtrxDiver = 		plt.subplot2grid((3,4), (0,0))
+  scoresPlt=		plt.subplot2grid((3,4), (0,2))
+  mtrxDensPlt=		plt.subplot2grid((3,4), (0,3))
+  
+  progressPlt=		plt.subplot2grid((3,4), (1,0), colspan=4)
+  
+  errPlt=		plt.subplot2grid((3,4), (2,0), colspan=2)
+  voutPlt=	plt.subplot2grid((3,4), (2,2), colspan=2)
+  
+  plt.subplots_adjust(hspace=0.3)
+
+  vectorValuesHASHES = []
+  BigCircuitMatrixHASHES = []
+  for i in range(0, POP_SIZE):
+    vectorValuesHASHES.append(generation.pool[i].valuHash)
+    BigCircuitMatrixHASHES.append(generation.pool[i].reduMtrxHash)
+
+
+  IDs.set_title('Topology/values\n uniquiness')
+  #IDs.plot(range(0,POP_SIZE), sorted(generation.matrixQuaziIDs), '-', label='mtrx qID')
+  IDs.plot(range(0,POP_SIZE), sorted(BigCircuitMatrixHASHES), 'k-', label='mtrx qID')
+  IDs.plot(range(0,POP_SIZE), sorted(vectorValuesHASHES), 'g-', label='values qID')
+  IDs.grid(True)
+
+
+  mtrxDiver.set_title('Last generation\n diversity')
+  mtrxDiver.imshow(Msum, interpolation='nearest', cmap=plt.cm.OrRd)#Blues)
+  
+  #scoresPlt.set_title('Last generation\ncost values')
+  scoresPlt.set_title('Last generation\nFullDesign/Nominal objectives')
+  scoresPlt.plot(allObjectiveScores[:,0], allObjectiveScores[:,1], '*', label='FailuresSTD/Nominal')
+  scoresPlt.grid(True)
+
+  #mtrxDensPlt.set_title('Last generation\n matrix fillfactors')
+  mtrxDensPlt.set_title('Last generation\nFailuresSTD/Nominal objective')
+  mtrxDensPlt.plot(allObjectiveScores[:,0], allObjectiveScores[:,2], '*', label='FailuresSTD/Nominal')
+  mtrxDensPlt.grid(True)
+
+  
+  errPlt.set_title('Err (Vin)')
+  errPlt.set_ylabel('[V]')
+  errPlt.set_xlabel('[V]')
+
+  
+  if not GLOBAL.robustMode:
+    target = np.sqrt(result[1]['scale']['nominal'])
+    errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+  else:
+    target = np.sqrt(result[0][1][0]['scale']['nominal'])
+    for r in result[0][1]:
+      errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '-')
+
+
+  voutPlt.set_title('Vout(Vin)')
+  voutPlt.set_ylabel('[V]')
+  voutPlt.set_xlabel('[V]')
+  
+  if not GLOBAL.robustMode:
+    voutPlt.plot(result[1]['scale']['nominal'], target, '.')
+    voutPlt.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
+  else:
+    voutPlt.plot(result[0][1][0]['scale']['nominal'], np.sqrt(result[0][1][0]['scale']['nominal']), '.')
+    for r in result[0][1]:
+      voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], '-')
+
+
+
+
+
+  voutPlt.grid(True)
+
+
+ 
+  progressPlt.set_title('Evolution progress - cost function over generations')
+  progressPlt.set_ylabel('Cost value')  
+  
+  progressPlt.plot(range(0,len(progress[:,0])), progress, '-', label='bestO1')
+  progressPlt.plot(range(0,len(progress[:,1])), progress, '-', label='bestO2')
+  progressPlt.plot(range(0,len(progress[:,2])), progress, '-', label='bestO3')
+  #b, = progressPlt.semilogy(range(0,len(progress)), np.array(averageScore)/1, '-', label='average\n(w/o randoms)')
+  #first_legend = progressPlt.legend(handles=[a,b, c], loc=1) 
+  progressPlt.grid(True)
+
+  
+
+  
   
   name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + ".png" #ploting every generation in separate file
   plt.savefig(name)
@@ -697,4 +824,5 @@ def squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, 
 
 #filterActiveLP_MOEA(generation, generationNum, bestScoresList, result, bestI)
 
-squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, bestI)
+#squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, bestI)
+squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI)

@@ -83,10 +83,8 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
 
             #----------------------------------------------------------Score function MULTI-OBJECTIVE
             else: #MOEAMODE == 1
-                score = np.array([_dcgain, _maxpower, _gain_stddev_norm]) + 0 # + _dcvout_rmse
-                if disfCount > 0:
-                    score = (np.array([0,0,0])+np.exp(disfCount) * 1e3) + np.array([random.random()*10,random.random()*10,random.random()*10])
-                
+                score = np.array([score_array[0], score_array.sum(), score_array.std()])
+
                 #print "score64", score
                 if gen > 30:
                     for i in range(0, len(score)): #round to 5 decimal points
