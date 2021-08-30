@@ -16,7 +16,7 @@ from utils import returnMaxValueVector, returnMinValueVector, dynamic_module_imp
 from scoreFunctions import *
 from globalVars import PROBLEMname, PROBLEMpath
 
-from scorefunctions.arithmetic.scoreCirc_squareroot_resilenceMode import scoreCirc_squareroot_resilenceMode as PROBLEM
+from scorefunctions.arithmetic.scoreCirc_log_resilenceMode import scoreCirc_log_resilenceMode as PROBLEM
 
 
 

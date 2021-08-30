@@ -823,6 +823,116 @@ def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
   plt.savefig(name)
 
 
+
+
+def logcirc_MOEA(generation, generationNum, bestScoresList, result, bestI):
+  """Plots a diversity in generation and evolution progress of Multi-Objective Evolutionary Process."""
+  
+  progress = np.array(bestScoresList)
+  allObjectiveScores = data[9]
+  
+  #sum a generation into single matrix
+  Msum = np.diag(np.zeros(BigMatrixSize,dtype=int),0)	
+  for i in generation.pool:
+	  Msum = Msum + i.BigCircuitMatrix
+  Msum = Msum - np.diag(len(generation.pool)*np.ones(BigMatrixSize,dtype=int),0)
+  # Plot window
+  fig = plt.figure(1, figsize=(14, 11), dpi=100, facecolor='w', edgecolor='k')
+  
+  # Create 4 subplots, 2x2
+  IDs=			plt.subplot2grid((3,4), (0,1))
+  mtrxDiver = 		plt.subplot2grid((3,4), (0,0))
+  scoresPlt=		plt.subplot2grid((3,4), (0,2))
+  mtrxDensPlt=		plt.subplot2grid((3,4), (0,3))
+  
+  progressPlt=		plt.subplot2grid((3,4), (1,0), colspan=4)
+  
+  errPlt=		plt.subplot2grid((3,4), (2,0), colspan=2)
+  voutPlt=	plt.subplot2grid((3,4), (2,2), colspan=2)
+  
+  plt.subplots_adjust(hspace=0.3)
+
+  vectorValuesHASHES = []
+  BigCircuitMatrixHASHES = []
+  for i in range(0, POP_SIZE):
+    vectorValuesHASHES.append(generation.pool[i].valuHash)
+    BigCircuitMatrixHASHES.append(generation.pool[i].reduMtrxHash)
+
+
+  IDs.set_title('Topology/values\n uniquiness')
+  #IDs.plot(range(0,POP_SIZE), sorted(generation.matrixQuaziIDs), '-', label='mtrx qID')
+  IDs.plot(range(0,POP_SIZE), sorted(BigCircuitMatrixHASHES), 'k-', label='mtrx qID')
+  IDs.plot(range(0,POP_SIZE), sorted(vectorValuesHASHES), 'g-', label='values qID')
+  IDs.grid(True)
+
+
+  mtrxDiver.set_title('Last generation\n diversity')
+  mtrxDiver.imshow(Msum, interpolation='nearest', cmap=plt.cm.OrRd)#Blues)
+  
+  #scoresPlt.set_title('Last generation\ncost values')
+  scoresPlt.set_title('Last generation\nFullDesign/Nominal objectives')
+  scoresPlt.semilogy(allObjectiveScores[:,0], allObjectiveScores[:,1], '*', label='FullDesign/Nominal')
+  scoresPlt.grid(True)
+
+  #mtrxDensPlt.set_title('Last generation\n matrix fillfactors')
+  mtrxDensPlt.set_title('Last generation\nFailuresSTD/Nominal objective')
+  mtrxDensPlt.plot(allObjectiveScores[:,0], allObjectiveScores[:,2], '*', label='FailuresSTD/Nominal')
+  mtrxDensPlt.grid(True)
+
+  
+  errPlt.set_title('Err (Vin)')
+  errPlt.set_ylabel('[V]')
+  errPlt.set_xlabel('[V]')
+
+  
+  if not GLOBAL.robustMode:
+    target = 2*np.log(result[1]['scale']['nominal'] + 1)
+    errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+  else:
+    target = 2*np.sqrt(result[0][1][0]['scale']['nominal'] + 1)
+    first = True
+    for r in result[0][1]:
+      if first:
+        errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '*')
+        first = False
+      else:
+        errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '-')
+
+  errPlt.grid(True)
+
+  voutPlt.set_title('Vout(Vin)')
+  voutPlt.set_ylabel('[V]')
+  voutPlt.set_xlabel('[V]')
+  
+  if not GLOBAL.robustMode:
+    voutPlt.plot(result[1]['scale']['nominal'], target, '.')
+    voutPlt.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
+  else:
+    voutPlt.plot(result[0][1][0]['scale']['nominal'], 2*np.log(result[0][1][0]['scale']['nominal'] + 1), '.')
+    for r in result[0][1]:
+      voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], '-')
+
+  voutPlt.grid(True)
+
+  progressPlt.set_title('Evolution progress - cost function over generations')
+  progressPlt.set_ylabel('Cost value')  
+  
+  progressPlt.semilogy(range(0,len(progress[:,0])), progress, '-', label='bestO1')
+  progressPlt.semilogy(range(0,len(progress[:,1])), progress, '-', label='bestO2')
+  progressPlt.semilogy(range(0,len(progress[:,2])), progress, '-', label='bestO3')
+  #b, = progressPlt.semilogy(range(0,len(progress)), np.array(averageScore)/1, '-', label='average\n(w/o randoms)')
+  #first_legend = progressPlt.legend(handles=[a,b, c], loc=1) 
+  progressPlt.grid(True)
+
+  
+
+  
+  
+  name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + ".png" #ploting every generation in separate file
+  plt.savefig(name)
+  name = datadirname + "/" + "generationPlot" + ".png"
+  plt.savefig(name)
+
 #diversityPlot(generation, generationNum, bestScoresList, result, bestI)
 #diversityPlot_pLP(generation, generationNum, bestScoresList, result, bestI)
 #cmosVoltRef_evolutionPlot(generation, generationNum, bestScoresList, result, bestI)
@@ -831,4 +941,5 @@ def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
 #filterActiveLP_MOEA(generation, generationNum, bestScoresList, result, bestI)
 
 #squareroot_evolutionPlot(generation, generationNum, bestScoresList, result, bestI)
-squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI)
+#squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI)
+logcirc_MOEA(generation, generationNum, bestScoresList, result, bestI)
