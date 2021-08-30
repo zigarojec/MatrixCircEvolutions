@@ -5,11 +5,11 @@ from reproduction import makeNetlist, makeNetlist_netlister
 #import ... runme2
 from  globalVars import *
 
-import scorefunctions.arithmetic.runme as runme
+import scorefunctions.arithmetic.runme_log as runme
 
 import os, sys
 
-def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
+def scoreCirc_log_resilenceMode(circuit, gen, indi, MOEAMODE):
     """
     scoreCirc_squarerootcirc_resilenceMode is a wrapper function which calls a runme file. 
     In resilenceMode it adds multiple scores (costs) together. 
@@ -22,7 +22,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
         Internal function for netlist evaluation call. 
         """
         #makeNetlist_netlister(circuit)
-        cost, results = runme.evaluate_squarerootcirc(circuit.filename)
+        cost, results = runme.evaluate_logcirc(circuit.filename)
         results_list.append(results)
         return cost
 
@@ -48,7 +48,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
             
             # Nominal models evaluation.
             makeNetlist_netlister(circuit)  
-            score, results = runme.evaluate_squarerootcirc(circuit.filename, nominalTopology=True)
+            score, results = runme.evaluate_logcirc(circuit.filename, nominalTopology=True)
             results_list.append(results)
             #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
             os.remove(circuit.filename) #cleanup current subcircuit
@@ -65,7 +65,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
                                           ElementNo =  int(elm_num[1]),
                                           ModelName = mod)
                     # ----------------------------------- #
-                    score, results = runme.evaluate_squarerootcirc(circuit.filename)
+                    score, results = runme.evaluate_logcirc(circuit.filename)
                     results_list.append(results)
                     score_array = np.append(score_array, score)
                     # ----------------------------------- # 
@@ -99,6 +99,6 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
         else:
             # Nominal models evaluation.
             makeNetlist_netlister(circuit)  
-            score, results = runme.evaluate_squarerootcirc(circuit.filename, nominalTopology=True)
+            score, results = runme.evaluate_logcirc(circuit.filename, nominalTopology=True)
             os.remove(circuit.filename) #cleanup current subcircuit
     return score, results

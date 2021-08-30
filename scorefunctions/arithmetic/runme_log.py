@@ -9,8 +9,8 @@ from pyopus.simulator.hspice import ipath
 
 # ROBUST CIRCUIT EVOLUTION
 
-def evaluate_squarerootcirc(filename, **kwargs):
-    """Evaluation script for pyopus. It evaluates performance of simple amplifier. 
+def evaluate_logcirc(filename, **kwargs):
+    """Evaluation script for pyopus. It evaluates performance of simple logarithmic circuit. 
     
     """    
     heads={
@@ -75,14 +75,14 @@ def evaluate_squarerootcirc(filename, **kwargs):
             'analysis' : 'dc_sweep_tf',
             'corners' : [ 'nominal' ],
             'script': """
-targets = np.sqrt(v("vin"))
+targets = 2 * np.log(v("vin") + 1)
 outputs = v("vout")
 #__result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
 __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 """,
             'vector' : False,
         },               
-        
+    
         }
     corners = {
         'nominal': {
@@ -134,7 +134,9 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 
 
             'script': """   
-transistorList = ['xzds_1','xzds_2','xzds_3']  #
+#transistorList = ['xzds_1','xzds_2','xzds_3']  #
+transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xnpns_5', 'xnpns_6', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4', 'xpnps_5', 'xpnps_6']  #
+
 transistorActive = []
 for t in transistorList:
     vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 

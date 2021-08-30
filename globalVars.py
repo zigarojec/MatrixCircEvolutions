@@ -14,7 +14,7 @@ from buildingBlocksBank import buildBlocks, paramBounds
 
 #Define the cost function--------------------------
 PROBLEMpath = 'scorefunctions/arithmetic/'	# do not forget the last slash! "path/to/the/module/"
-PROBLEMname = 'scoreCirc_squareroot_resilenceMode'
+PROBLEMname = 'scoreCirc_log_resilenceMode'
 #---------------------------------------------------
 #Problem names available: (obsolete, please inspect the scorefunctions folder)
 # scoreCirc_ActiveFilter_2
@@ -23,7 +23,7 @@ PROBLEMname = 'scoreCirc_squareroot_resilenceMode'
 # scoreCirc_HighPass
 # scoreCirc_commonEmitterAmp_resilenceMode
 
-seedN = 0		#random seed
+seedN = 7		#random seed
 continuee = 	0	#to continue the algorithm from the last run
 optimise = 	1	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve

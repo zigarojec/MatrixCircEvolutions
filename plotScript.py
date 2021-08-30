@@ -754,7 +754,7 @@ def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
   
   #scoresPlt.set_title('Last generation\ncost values')
   scoresPlt.set_title('Last generation\nFullDesign/Nominal objectives')
-  scoresPlt.plot(allObjectiveScores[:,0], allObjectiveScores[:,1], '*', label='FailuresSTD/Nominal')
+  scoresPlt.semilogy(allObjectiveScores[:,0], allObjectiveScores[:,1], '*', label='FullDesign/Nominal')
   scoresPlt.grid(True)
 
   #mtrxDensPlt.set_title('Last generation\n matrix fillfactors')
@@ -773,9 +773,15 @@ def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
     errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
   else:
     target = np.sqrt(result[0][1][0]['scale']['nominal'])
+    first = True
     for r in result[0][1]:
-      errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '-')
+      if first:
+        errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '*')
+        first = False
+      else:
+        errPlt.plot(r['scale']['nominal'], target-r['vout']['nominal'], '-')
 
+  errPlt.grid(True)
 
   voutPlt.set_title('Vout(Vin)')
   voutPlt.set_ylabel('[V]')
@@ -800,9 +806,9 @@ def squareroot_MOEA(generation, generationNum, bestScoresList, result, bestI):
   progressPlt.set_title('Evolution progress - cost function over generations')
   progressPlt.set_ylabel('Cost value')  
   
-  progressPlt.plot(range(0,len(progress[:,0])), progress, '-', label='bestO1')
-  progressPlt.plot(range(0,len(progress[:,1])), progress, '-', label='bestO2')
-  progressPlt.plot(range(0,len(progress[:,2])), progress, '-', label='bestO3')
+  progressPlt.semilogy(range(0,len(progress[:,0])), progress, '-', label='bestO1')
+  progressPlt.semilogy(range(0,len(progress[:,1])), progress, '-', label='bestO2')
+  progressPlt.semilogy(range(0,len(progress[:,2])), progress, '-', label='bestO3')
   #b, = progressPlt.semilogy(range(0,len(progress)), np.array(averageScore)/1, '-', label='average\n(w/o randoms)')
   #first_legend = progressPlt.legend(handles=[a,b, c], loc=1) 
   progressPlt.grid(True)
