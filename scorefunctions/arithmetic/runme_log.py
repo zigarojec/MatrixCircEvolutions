@@ -135,7 +135,7 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 
             'script': """   
 #transistorList = ['xzds_1','xzds_2','xzds_3']  #
-transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xnpns_5', 'xnpns_6', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4', 'xpnps_5', 'xpnps_6']  #
+transistorList = ['xzds_1', 'xzds_2', 'xzds_3', 'xzds_4', 'xzds_5', 'xzds_6', 'xzds_7', 'xzds_8', 'xzds_9', 'xzds_10']  #
 
 transistorActive = []
 for t in transistorList:
