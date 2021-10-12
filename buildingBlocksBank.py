@@ -33,7 +33,7 @@ buildBlocks =  [
       {	#Simple resistor
 	'SpiceElementType': 'r',	# How this element is encoded in Spice netlist
 	'Element': 'Rs',
-	'Quantity': 10, #<---NOTE
+	'Quantity': 0, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
 	'ParamTypes': {'r':'r'},
@@ -93,7 +93,7 @@ buildBlocks =  [
 	'Element':'ZDs',
 	'Quantity': 10,#<---NOTE
 	'NofPins':  2,
-	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_sck', 'zd4v7_resil_himp']
+	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_sck', 'zd4v7_resil_himp'],
 	'ParamTypes': {},
 	  },
 
@@ -105,6 +105,16 @@ buildBlocks =  [
 	'Model': 'vdc',
 	'ParamTypes': {'v':'v'},     
 	  },
+
+      {	#Resistor ROBUST MODE
+	'SpiceElementType': 'x', # Check subcircuit in models
+	'Element':'rrob',
+	'Quantity': 10,#<---NOTE
+	'NofPins':  2,
+	'Model': ['resistor_nom', 'resistor_himp', 'resistor_sck'],
+	'ParamTypes': {'r':'r'},     
+	  },
+
 
 
 

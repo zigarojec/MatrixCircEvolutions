@@ -77,12 +77,15 @@ def evaluate_logcirc(filename, **kwargs):
             'script': """
 targets = 2 * np.log(v("vin") + 1)
 outputs = v("vout")
+x = v("vin")
 #__result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
-__result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
+#__result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
+__result = np.sqrt((((outputs - targets) ** 2)*x[::-1]/x.min()).mean()) # Offset INCLUDED, weights included
+#x[::-1]/x.min()
 """,
             'vector' : False,
-        },               
-    
+        },
+
         }
     corners = {
         'nominal': {

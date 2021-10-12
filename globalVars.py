@@ -42,8 +42,8 @@ NofElite =  	2*multipl
 NofRANDOMS = 	20*multipl
 tournamentSize = 3
 
-matingProb = 0.4
-topologyGenOperProb = 0.5     # 0...only parameter optimization
+matingProb = 0.6
+topologyGenOperProb = 0.7     # 0...only parameter optimization
                             # 1...only topology optimization
 
 #---------------------------------------------------

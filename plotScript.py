@@ -889,7 +889,7 @@ def logcirc_MOEA(generation, generationNum, bestScoresList, result, bestI):
     target = 2*np.log(result[1]['scale']['nominal'] + 1)
     errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
   else:
-    target = 2*np.sqrt(result[0][1][0]['scale']['nominal'] + 1)
+    target = 2*np.log(result[0][1][0]['scale']['nominal'] + 1)
     first = True
     for r in result[0][1]:
       if first:

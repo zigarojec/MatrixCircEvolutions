@@ -9,13 +9,16 @@ A .pkl file with all the data should exist in ../_MAIN_data/backdata.pkl.
 
 import pickle
 import numpy as np
-from scoreFunctions import scoreCirc_CmosVoltageReference_2
+
 from copy import copy
 from utils import printer
 import matplotlib.pylab as plt
+import globalVars as GLOBAL 
+
+from scorefunctions.arithmetic.scoreCirc_squareroot_resilenceMode import scoreCirc_squareroot_resilenceMode as PROBLEM
 
 #open backdata.pkl
-with open("../_MAIN_data/backdata.pkl","r") as pkl_file:
+with open("../_MAIN_data/backdata.pkl","rb") as pkl_file:
   data = pickle.load(pkl_file)
 pkl_file.close()
 
@@ -34,72 +37,72 @@ datadirname = '../_MAIN_data/' + datadirname
 gMOEA = 1
 
 
-def plotTemp(results):
-  x = results[1]['vout_vdd_scale']['nominal']
-  y = results[1]['vout_vdd_temp1']['nominal']
-  plt.hold(True)
-  plt.plot(x, y,linewidth=2)
-  y = results[1]['vout_vdd_temp2']['nominal']
-  plt.plot(x, y,linewidth=2)
-  y = results[1]['vout_vdd_temp3']['nominal']
-  plt.plot(x, y,linewidth=2)
+def plot_sqrt(results):
+  fig = plt.figure(1, figsize=(14, 11), dpi=100, facecolor='w', edgecolor='k')
+  x = results[1][1]['scale']['nominal']
+  for r in results[1]:
+    x = r['scale']['nominal']
+    y = r['vout']['nominal']
+    plt.plot(x, y)
+
+
+  plt.plot(x, np.sqrt(x), "*")
   plt.grid(True)
-  plt.hold(False)
-  plt.show()
-  
-def plotTran(results):
-  x = results[1]['t']['nominal']
-  yin = results[1]['vin_psrr']['nominal']
-  yout = results[1]['vout_psrr']['nominal']
-  plt.hold(True)
-  plt.plot(x, yin)
-  plt.plot(x, yout)
-  plt.grid(True)
-  plt.hold(False)
-  plt.show()
+
+  #plt.show()
+  name = datadirname + "/" + "diversityPlots/" + "test_pareto_search" + ".png" #ploting every generation in separate file
+  plt.savefig(name)  
 
 if __name__=='__main__':
   setOfChosen = []
-  print datadirname
+  print(datadirname)
+
+  eps1 = 2
   if gMOEA: 
     #plt.hold(True)
     for individual in generation.pool:
-      if (individual.objectivesScore[2] < 0.0019 #oP (power)
-	  and
-	  individual.objectivesScore[1] < 0.015 #oPsrr (P-P value)
-	  and
-	  individual.objectivesScore[0] < 0.19 #oMediana (abs(x - VREF) at 3 temps @11V)
-	  ):
-	setOfChosen.append(individual)
-	print individual
-	print individual.objectivesScore
-	lastBestIndividual = copy(individual)
-
-	if len(setOfChosen):
-	  results = scoreCirc_CmosVoltageReference_2(lastBestIndividual, 1234, 1234, 1)
-	
-	  if 1:
-	    printer(results, 0, generationNum, problem = 'scoreCirc_CmosVoltageReference_2')
-	    plotTemp(results)
-	    #plotTran(results)
-    #plt.hold(False)
-    #plt.show() 
-
-  else:
-    bestIndeces = np.argsort(generation.scores)
+      if (
+        #individual.objectivesScore[2] < 10 # score_array.std()
+        # and
+        #(individual.objectivesScore[1] < 250+eps1 and individual.objectivesScore[1] > 250-eps1) # score_array.sum()
+        #and
+        (individual.objectivesScore[0]) < 11 #+eps1 and individual.objectivesScore[0] > 10-eps1) # score_array[0]
+        ):
+          setOfChosen.append(individual)
+          print(individual)
+          print(individual.objectivesScore)
     
-    #plt.hold(True)
-    
-    for i in bestIndeces:
-      results = scoreCirc_CmosVoltageReference_2(generation.pool[i], 1234, 1234, 0)
-      printer(results, 0, generationNum, problem = 'scoreCirc_CmosVoltageReference_2')
-      plotTemp(results)
-      #plotTran(results)
+    print("This is ", len(setOfChosen), " individuals. Evaluating now.")
+    for chosen in setOfChosen:
+      print(chosen)
+      print(chosen.objectivesScore)
+      results = PROBLEM(chosen, 1234, 1234, 1)  
+      print(results)
+      input("Tisni!")
 
-    #plt.hold(False)
-    #plt.show()  
+      #plot_sqrt(results)
+
+      fig = plt.figure(1, figsize=(14, 11), dpi=100, facecolor='w', edgecolor='k')
+      
+      for r in results[1]:
+        x = r['scale']['nominal']
+        y = r['vout']['nominal']
+        if x is None or y is None:
+          print(x)
+          print(y)
+        plt.plot(x, y)
+
+
+
     
-  print "End."
-  print "This is ", len(setOfChosen), " individuals."
+    x = results[1][1]['scale']['nominal']
+    plt.plot(x, np.sqrt(x), "*")
+    plt.grid(True)
+    
+    #plt.show()
+    name = datadirname + "/" + "diversityPlots/" + "test_pareto_search" + ".png" #ploting every generation in separate file
+    plt.savefig(name)  
+    
+  print("End.")
   
   

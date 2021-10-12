@@ -16,7 +16,8 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
     ResilenceMode means running the analysis over failure-corners (special failure modes of each individual component).
     """
 
-    debug = 0
+    debug = 10
+
     def evaluateNetlistAppendResults(circuitFilename, results_list):
         """
         Internal function for netlist evaluation call. 
@@ -73,7 +74,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
                     if debug > 2:    
                         print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
                         
-                    #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
+                    input("Here!") # Wait and inspect every netlist please PROCEED AND TEST HERE
                     os.remove(circuit.filename) #cleanup current subcircuit
 
             #----------------------------------------------------------Score function SINGLE-OBJECTIVE
