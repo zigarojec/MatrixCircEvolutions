@@ -36,7 +36,7 @@ MOEA = 1	# Multiobjective mode
 debug = 0
 
 #Evolutionary algorythm parameters:-----------------
-multipl = 	1
+multipl = 	2
 POP_SIZE = 	100*multipl
 NofElite =  	2*multipl
 NofRANDOMS = 	20*multipl

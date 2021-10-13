@@ -77,7 +77,7 @@ vn n nint dc=0
 d pint nint zd4v7
 .ends
 
-.subckt zd4v7_resil_himp p n 
+.subckt zd4v7_resil_himp p n
 vp p pint dc=0
 vn n nint dc=0
 

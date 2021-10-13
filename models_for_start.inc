@@ -95,6 +95,32 @@ r1 pint nint r=1m
 .ends
 * END DIODES (zd4v7) ***********************
 
+
+* RESISTOR RESILIENCE MODEL ***************
+.subckt resistor_nom p n param:r=10k
+vp p pint dc=0
+vn n nint dc=0
+
+r1 pint nint r={r}
+.ends
+
+.subckt resistor_himp p n param:r=10k
+vp p pint dc=0
+vn n nint dc=0
+
+r1 pint nint r=10meg
+.ends
+
+.subckt resistor_sck p n param:r=10k
+vp p pint dc=0
+vn n nint dc=0
+
+r1 pint nint r=1m
+.ends
+
+
+* END RESISTOR ****************************
+
 * VDC *************************************
 .subckt vdc p n param: v=1.69
 vdc p n dc={v}
