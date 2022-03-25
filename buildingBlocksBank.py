@@ -14,7 +14,7 @@ My advice - before you trigger the run, make sure you know, what kind of a circu
 """
 import numpy as np
 # This array contains the set of circuit nodes, that are accessible to the outer world. 
-outerConns = ['vout','gnd']
+outerConns = ['ina','inb', 'outa', 'outb']
 
 """
     {	#Simple resistor
@@ -91,16 +91,24 @@ buildBlocks =  [
       {	#Zener diode ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
 	'Element':'ZDs',
-	'Quantity': 10,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': ['zd4v7_resil_nom', 'zd4v7_resil_sck', 'zd4v7_resil_himp'],
+	'ParamTypes': {},
+	  },
+      {	#Rectifier diode D1N4148 ROBUST MODE
+	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
+	'Element':'Ds',
+	'Quantity': 10,#<---NOTE
+	'NofPins':  2,
+	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_nom_himp'],
 	'ParamTypes': {},
 	  },
 
       {	#Voltage supply
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'VDC',
-	'Quantity': 2,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': 'vdc',
 	'ParamTypes': {'v':'v'},     
@@ -109,7 +117,7 @@ buildBlocks =  [
       {	#Resistor ROBUST MODE
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'rrob',
-	'Quantity': 10,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': ['resistor_nom', 'resistor_himp', 'resistor_sck'],
 	'ParamTypes': {'r':'r'},     

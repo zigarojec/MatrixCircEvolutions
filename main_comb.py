@@ -114,7 +114,7 @@ if __name__=='__main__':
       #TODO set models in home folder for MPI. Fix that...
     'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
     'topdc_robust_commonemitter.cir':'.', 
-    'topdc_robust_squareroot.cir':'.',
+    'topdc.cir':'.',
   }))
   
   generationNum = 0
