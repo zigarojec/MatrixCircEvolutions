@@ -568,7 +568,7 @@ def printer(results, stw0, generationNum, **kwargs):
 
 
 
-  if kwargs['problem']=='scoreCirc_squareroot_resilenceMode':
+  if kwargs['problem']=='scoreCirc_squareroot_resilenceMode' or kwargs['problem']=='scoreCirc_rectifier':
     #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
     try:        
         if robustMode:

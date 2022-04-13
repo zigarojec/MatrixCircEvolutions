@@ -101,7 +101,7 @@ buildBlocks =  [
 	'Element':'Ds',
 	'Quantity': 10,#<---NOTE
 	'NofPins':  2,
-	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_nom_himp'],
+	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_himp'],
 	'ParamTypes': {},
 	  },
 

@@ -90,6 +90,9 @@ if __name__=='__main__':
   startdate = strftime("%Y_%m_%d")
   starttime = strftime("%H-%M-%S")
   print("Starting date: ", startdate, ", starting time: ", starttime)
+  print("/--------------------------------------\\")
+  print("Running problem: ", PROBLEMname)
+  print("\\--------------------------------------/")
   
   # GET YOUR WORKING DIRECTORY!
   working_directory_path = os.getcwd()
@@ -113,7 +116,7 @@ if __name__=='__main__':
   cOS.setVM(MPI(mirrorMap={
       #TODO set models in home folder for MPI. Fix that...
     'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
-    'topdc_robust_commonemitter.cir':'.', 
+    #'topdc_robust_commonemitter.cir':'.', 
     'topdc.cir':'.',
   }))
   

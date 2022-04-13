@@ -75,7 +75,8 @@ def evaluate_rectifier(filename, **kwargs):
             'analysis' : 'dc_sweep_tf',
             'corners' : [ 'nominal' ],
             'script': """
-targets = np.abs(v("vin"))
+#targets = np.abs(v("vin"))
+targets = np.abs(scale())
 outputs = v("vout")
 #__result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
 __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
@@ -99,7 +100,7 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
     definition = [
         {
             'measure': 'dcvout_rmse',
-            'norm': Nbelow(5.0, failure=10000.0), 	
+            'norm': Nbelow(0.3, failure=10000.0), 	
             'reduce': Rworst()
         },         
     ]
