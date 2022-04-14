@@ -528,9 +528,8 @@ if __name__=='__main__':
     with open(datadirname + "/backdata.pkl","wb") as output:
       pickle.dump(data, output)
     output.close()
-    #shutil.copy2('data.pkl', datadirname + '/backdata.pkl')	#copy current .pkl data to current run folder
-    #shutil.copy2(datadirname + "/backdata.pkl", working_directory_path + "backdata.pkl")
-    shutil.copy2(datadirname + "/backdata.pkl", "./backdata.pkl")
+    shutil.copy2(datadirname + "/backdata.pkl", working_directory_path + "/backdata.pkl") #copy current .pkl data to current run folder
+    #shutil.copy2(datadirname + "/backdata.pkl", "./backdata.pkl")
     
     os.chdir(working_directory_path)
     #End of evolution? :

@@ -568,21 +568,22 @@ def printer(results, stw0, generationNum, **kwargs):
 
 
 
-  if kwargs['problem']=='scoreCirc_squareroot_resilenceMode' or kwargs['problem']=='scoreCirc_rectifier':
+  if (kwargs['problem']=='scoreCirc_squareroot_resilenceMode' or 
+      kwargs['problem']=='scoreCirc_rectifier'):
     #stdoutstring += "\n:::GENERATION %4.d - BEST ONE::: %f ::YEAH!:: Time: %sh %sm %.2fs" %(generationNum,currentBestScore+ int(h)+ int(m)+ s)
-    try:        
-        if robustMode:
-            dcvout_rmse = []
-            for result in results[1]:
-                dcvout_rmse.append(result['dcvout_rmse']['nominal'])
-  
-            stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
-            stdoutstring += "\n\t - deviceActive: "+  str(results[1][0]['deviceActive']['nominal']) + "\t"       
-        else:
-            stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"
+    #try:        
+    if robustMode:
+        dcvout_rmse = []
+        for result in results[0][1]:
+            dcvout_rmse.append(result['dcvout_rmse']['nominal'])
 
-    except:
-      stdoutstring += "\nNo results to show."
+        stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
+        stdoutstring += "\n\t - deviceActive: "+  str(results[0][1][0]['deviceActive']['nominal']) + "\t"       
+    else:
+        stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"
+
+    #except:
+    #stdoutstring += "\nNo results to show."
     stdoutstring += "\n\t- - - - - - - - - - - - - - - - - - - - - - - - - - "
 
 
