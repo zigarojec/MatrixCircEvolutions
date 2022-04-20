@@ -178,7 +178,7 @@ if __name__=='__main__':
   stw0 = time()
   
   listener_thread = Thread(target = check_input)  # Starting the STOP signal listener. 
-  listener_thread.start()
+  listener_thread.start() #RETURN 
   
   #Parallel!! :)
   results=cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, globalVars.MOEA]) for i in range(0,len(hotGen.pool))), remote=True)
@@ -288,7 +288,7 @@ if __name__=='__main__':
         tempPool.add_individual(copy(offspring[i]))
         #print(offspring[i].objectivesScore)
         #print(offspring[i].reduMtrxHash)
-      if generationNum > 2:# and debug > 1:
+      if generationNum > 2 and globalVars.cleaningByScore:# and debug > 1:
         print("tempPool len before cleaning:", len(tempPool.pool))
         tempPool.pool = removeDuplicatesFromArrayByAttribute(tempPool.pool, "scoreHash")     
         print("tempPool len after cleaning:", len(tempPool.pool)) 
@@ -313,7 +313,7 @@ if __name__=='__main__':
         tempPool.fronts[frontCount].sort(key=lambda x: x.crow_dist, reverse=True)#sort the objects in fornt according to crowding distance
         for i in tempPool.fronts[frontCount]:
           hotGen.add_individual(copy(i))
-          if len(hotGen.pool) == globalVars.POP_SIZE:
+          if len(hotGen.pool) == globalVars.POP_SIZE: # MISSING -> what if we run out? SEMI-SOLVED by removing cleaning by scoreHash.
             notFull = 0
             break
         frontCount+=1

@@ -135,7 +135,7 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 
 
             'script': """   
-transistorList = ['xds_1','xds_2','xds_3', 'xds_4', 'xds_5', 'xds_6', 'xds_7', 'xds_8','xds_9','xds_10']  #
+transistorList = ['xds_1','xds_2','xds_3', 'xds_4', 'xds_5', 'xds_6', 'xds_7', 'xds_8','xds_9','xds_10','xds_11','xds_12']  #
 transistorActive = []
 for t in transistorList:
     vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 
