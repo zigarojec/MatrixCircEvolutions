@@ -28,6 +28,7 @@ if GLOBAL.MOEA:
 datadirname = '../_MAIN_data/' + datadirname
 #datadirname = "."
 
+print("GEN: ", generationNum)
 
 def logcirc_MOEA(generation, generationNum, bestScoresList, result, bestI):
   """Plots a diversity in generation and evolution progress of Multi-Objective Evolutionary Process."""
@@ -324,7 +325,7 @@ def duoplot_sqrt(generation, generationNum, bestScoresList, result, bestI):
     else:
         target = np.sqrt(result[0][1][0]['scale']['nominal'])
         OFFSET = target[0] - result[0][1][0]['vout']['nominal'][0]
-        print(OFFSET)
+        #print(OFFSET)
         first = True
         nexxt = None # 2 or 3 , 2st, 3nd
         count = 0
@@ -453,7 +454,7 @@ def duoplot_abs(generation, generationNum, bestScoresList, result, bestI):
     else:
         target = np.abs(result[0][1][0]['scale']['nominal'])
         OFFSET = target[0] - result[0][1][0]['vout']['nominal'][0]
-        print(OFFSET)
+        #print(OFFSET)
         first = True
         nexxt = None # 2 or 3 , 2st, 3nd
         count = 0

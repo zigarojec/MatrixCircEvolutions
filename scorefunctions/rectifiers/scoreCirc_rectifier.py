@@ -32,6 +32,7 @@ def scoreCirc_rectifier(circuit, gen, indi, MOEAMODE):
         score += 1e4*np.exp(OcSc)
         # for the sake of problems in sorting when scores are equal, add a small random difference
         score += np.array([random.random()*10,random.random()*10,random.random()*10]) if MOEAMODE == 1 else random.random()*10    
+        return score, results
     else:
         # Create netlist and calculate the cost function. 
         # Based on all models that are being used, create a series of evaluations, using the models listed in MODELSCHEME!
@@ -83,14 +84,23 @@ def scoreCirc_rectifier(circuit, gen, indi, MOEAMODE):
                         score[i] = np.float16(score[i]) 
                     #print "score16", score
                 score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
-            #-------------------------------------------------------------------
 
-            
+            #-------------------------------------------------------------------
             return score, results_list
+
+        else: # if not robustMode:
+            if MOEAMODE == 0:
+                # Nominal models evaluation.
+                makeNetlist_netlister(circuit)  
+                score, results = runme.evaluate_rectifier(circuit.filename, nominalTopology=True)
+                os.remove(circuit.filename) #cleanup current subcircuit
         
-        else:
-            # Nominal models evaluation.
-            makeNetlist_netlister(circuit)  
-            score, results = runme.evaluate_rectifier(circuit.filename, nominalTopology=True)
-            os.remove(circuit.filename) #cleanup current subcircuit
-    return score, results
+                return score, results
+            else:
+                print("WARNING. MOEA for NOROBUST NOT DEFINED.")
+                return None, None
+
+        #TODO HEY HEY solve out the combinations on MOEA/ROBUST etc
+    
+
+    
