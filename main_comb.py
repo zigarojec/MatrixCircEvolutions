@@ -364,9 +364,9 @@ if __name__=='__main__':
       #	-cleaning by matrix - 		"mtrxHash"
       #	-cleaning by topology - 	"reduMtrxHash"
       #	-cleaning by circuit - 		"fullHash"
-      print("TempPool len before cleaning:", len(tempPool))
-      tempPool = removeDuplicatesFromArrayByAttribute(tempPool, "fullHash")
-      print("TempPool len after cleaning:", len(tempPool))
+      print("TempPool len before cleaning:", len(tempPool.pool))
+      #tempPool = removeDuplicatesFromArrayByAttribute(tempPool.pool, "fullHash")
+      print("TempPool len after cleaning:", len(tempPool.pool))
       #----------------------------------------------------------------------
       
       #Evaluate the big temporary pool, sort results and append to current generation
@@ -448,39 +448,39 @@ if __name__=='__main__':
       
           #-------------#  
 
-        #adjust NofRANDOMS
-        if len(tempPool.pool) < (POP_SIZE - NofRANDOMS):
-          NofRANDOMS = POP_SIZE - len(tempPool.pool)    
+      #adjust NofRANDOMS
+      if len(tempPool.pool) < (POP_SIZE - NofRANDOMS):
+        NofRANDOMS = POP_SIZE - len(tempPool.pool)    
 
-        #adding random new individuals"
-        indN = len(hotGen.pool)
+      #adding random new individuals"
+      indN = len(hotGen.pool)
+      
+      NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,NofRANDOMS)), remote=True)
+      for i in range(0,NofRANDOMS):
+        hotGen.pool = np.append(hotGen.pool, deepcopy(NEWindividuals[i]))
         
-        NEWindividuals = cOS.dispatch(jobList=((dispatchRandomCircuitObjectGeneration, [i]) for i in range(0,NofRANDOMS)), remote=True)
-        for i in range(0,NofRANDOMS):
-          hotGen.pool = np.append(hotGen.pool, deepcopy(NEWindividuals[i]))
-          
-        #for i in range(0, NofRANDOMS):
-        #  mutant = createRandomBigCircuitMatrix(copy(createRandomValueVector()))
-        #  hotGen.pool = np.append(hotGen.pool, deepcopy(mutant))
+      #for i in range(0, NofRANDOMS):
+      #  mutant = createRandomBigCircuitMatrix(copy(createRandomValueVector()))
+      #  hotGen.pool = np.append(hotGen.pool, deepcopy(mutant))
 
-        #evaluate randoms
-        results = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0, NofRANDOMS)), remote=True)
-        #sort results
-        results = np.array(results)
-        hotGen.scores = np.append(hotGen.scores, copy(np.transpose(results[:,0])))
-        #hotGen.matrixDensities = np.append(hotGen.matrixDensities, copy(np.transpose(results[:,1])))
+      #evaluate randoms
+      results = cOS.dispatch(jobList=((PROBLEM, [hotGen.pool[i], generationNum, i, False]) for i in range(0, NofRANDOMS)), remote=True)
+      #sort results
+      results = np.array(results)
+      hotGen.scores = np.append(hotGen.scores, copy(np.transpose(results[:,0])))
+      #hotGen.matrixDensities = np.append(hotGen.matrixDensities, copy(np.transpose(results[:,1])))
       # hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, copy(np.transpose(results[:,2])))
 
-        #adding randoms and offspring together
-        hotGen.pool = np.append(hotGen.pool, tempPool.pool[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-        hotGen.scores = np.append(hotGen.scores, tempPool.scores[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-        #hotGen.matrixDensities = np.append(hotGen.matrixDensities, tempPool.matrixDensities[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-        #hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, tempPool.matrixQuaziIDs[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
-        #sort all
-        sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
-        currentBestScore = float(hotGen.scores[sortedPool_Indices[0]])
-        bestScoresList.append(currentBestScore)
-        averageScoresList.append(np.average(np.sort(hotGen.scores)[:(POP_SIZE-NofRANDOMS)]))
+      #adding randoms and offspring together
+      hotGen.pool = np.append(hotGen.pool, tempPool.pool[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+      hotGen.scores = np.append(hotGen.scores, tempPool.scores[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+      #hotGen.matrixDensities = np.append(hotGen.matrixDensities, tempPool.matrixDensities[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+      #hotGen.matrixQuaziIDs = np.append(hotGen.matrixQuaziIDs, tempPool.matrixQuaziIDs[sortedTempPool_Indices[:(POP_SIZE-NofRANDOMS)]])
+      #sort all
+      sortedPool_Indices = np.argsort(hotGen.scores, kind='mergesort')
+      currentBestScore = float(hotGen.scores[sortedPool_Indices[0]])
+      bestScoresList.append(currentBestScore)
+      averageScoresList.append(np.average(np.sort(hotGen.scores)[:(POP_SIZE-NofRANDOMS)]))
         
       
     
