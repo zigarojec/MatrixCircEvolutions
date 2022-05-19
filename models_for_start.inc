@@ -172,3 +172,34 @@ d1 pint nint D1N4148
 r1 pint nint r=1m
 .ends
 * END DIODES (D1N4148) ***********************
+
+
+* RESILENCE MODEL DIODE_SERIAL D1N4148
+* A hack that we can benefit from:
+* Our method is poor in puting things in-series. 
+* Giving the method a diode in series. 
+.subckt D1N4148_serial_resil_nom p n 
+vp p pint dc=0
+vn n nint dc=0
+
+d1 pint int1 D1N4148
+d2 int1 nint D1N4148
+.ends
+
+.subckt D1N4148_serial_resil_himp p n
+vp p pint dc=0
+vn n nint dc=0
+
+*d1 pint nint D1N4148
+r1 pint nint r=1meg
+.ends
+
+* sck might not be used, since is not causing anything in series... 
+.subckt D1N4148_serial_resil_sck p n 
+vp p pint dc=0
+vn n nint dc=0
+
+d1 pint nint D1N4148
+r1 pint nint r=1m
+.ends
+* END DIODES (D1N4148) ***********************

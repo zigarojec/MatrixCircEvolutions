@@ -27,7 +27,7 @@ seedN = 7		#random seed
 continuee = 	0	#to continue the algorithm from the last run
 optimise = 	0	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve
-robustMode = 1      #iterate through all models listed for device when evaluating
+robustMode = 1      #iterate through all models listed for device when evaluating (works only with MOEA=>1 in this version)
 MOEA = 1	# Multiobjective mode
 			#(if continuee == 1) 
 			#	copy backdata.pkl into main folder manually! 
@@ -35,7 +35,7 @@ MOEA = 1	# Multiobjective mode
 #Debug
 debug = 0
 
-#Evolutionary algorythm parameters:-----------------
+#Evolutionary algorithm parameters:-----------------
 multipl = 	1
 POP_SIZE = 	100*multipl
 NofElite =  	2*multipl

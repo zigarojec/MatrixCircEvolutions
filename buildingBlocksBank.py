@@ -99,12 +99,19 @@ buildBlocks =  [
       {	#Rectifier diode D1N4148 ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
 	'Element':'Ds',
-	'Quantity': 12,#<---NOTE
+	'Quantity': 4,#<---NOTE
 	'NofPins':  2,
 	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_himp'],
 	'ParamTypes': {},
 	  },
-
+      {	#Rectifier diode IN SERIES D1N4148 ROBUST MODE
+	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
+	'Element':'Ds',
+	'Quantity': 8,#<---NOTE
+	'NofPins':  2,
+	'Model': ['D1N4148_serial_resil_nom', 'D1N4148_serial_resil_himp'],
+	'ParamTypes': {},
+	  },
       {	#Voltage supply
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'VDC',

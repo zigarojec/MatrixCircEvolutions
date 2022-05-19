@@ -29,6 +29,7 @@ datadirname = '../_MAIN_data/' + datadirname
 #datadirname = "."
 
 print("GEN: ", generationNum)
+print("DIR: ", datadirname)
 
 def logcirc_MOEA(generation, generationNum, bestScoresList, result, bestI):
   """Plots a diversity in generation and evolution progress of Multi-Objective Evolutionary Process."""
