@@ -74,18 +74,18 @@ buildBlocks =  [
       {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'NPNs',
-	'Quantity': 0,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
+	'Quantity': 4,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
 	'NofPins':  3,
-	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp', 'T2N2222_resil_sck'], #,  
+	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp'], #, 'T2N2222_resil_sck'], #,  
 	'ParamTypes': {},     
 	  },
       
       {	#PNP BJ Transistor MULTI MODEL ROBUST CHECK TEST
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'PNPs',
-	'Quantity': 0,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
+	'Quantity': 4,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
 	'NofPins':  3,
-	'Model': ['2N2907_resil_nom', '2N2907_resil_himp', '2N2907_resil_sck'], #,  
+	'Model': ['2N2907_resil_nom', '2N2907_resil_himp'], #, '2N2907_resil_sck'], #,  
 	'ParamTypes': {},     
 	  },      
       {	#Zener diode ROBUST MODE
@@ -99,15 +99,15 @@ buildBlocks =  [
       {	#Rectifier diode D1N4148 ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
 	'Element':'Ds',
-	'Quantity': 4,#<---NOTE
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_himp'],
 	'ParamTypes': {},
 	  },
       {	#Rectifier diode IN SERIES D1N4148 ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
-	'Element':'Ds',
-	'Quantity': 8,#<---NOTE
+	'Element':'DDs',
+	'Quantity': 0,#<---NOTE
 	'NofPins':  2,
 	'Model': ['D1N4148_serial_resil_nom', 'D1N4148_serial_resil_himp'],
 	'ParamTypes': {},

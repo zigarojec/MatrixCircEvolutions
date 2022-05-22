@@ -46,7 +46,7 @@ def evaluate_rectifier(filename, **kwargs):
             'modules': [ 'def', 'tb', 'models' ], 
             'params': {}, 
             'saves': [ ],  
-            'command': "dc(-10, 10, 'lin', 100, 'vin', 'dc')"
+            'command': "dc(-50, 50, 'lin', 100, 'vin', 'dc')"
             },            
         }
 
@@ -135,24 +135,31 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 
 
             'script': """   
-transistorList = ['xds_1','xds_2','xds_3', 'xds_4', 'xds_5', 'xds_6', 'xds_7', 'xds_8','xds_9','xds_10','xds_11','xds_12']  #
+# Using transistors:
+transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4']  #
 transistorActive = []
 for t in transistorList:
-    vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 
+    #vce = v('cint:' + t + ':xcirc', 'eint:' + t + ':xcirc') #Vce 
+    vce = v(ipath('cint', [t, 'xcirc']), ipath('eint', [t, 'xcirc'])) #Vce 
     #ipath() is universal pyopus function to access instance (node) e.g. cint in subcircuit (device) t that is part of another subcircuit xcirc. 
-    ipn = i(ipath('vp', [t, 'xcirc']))    #Ipn
+    #ice = i('vc:' + t + ':xcirc')    #Ice
+    ice = i(ipath('vc', [t, 'xcirc']))    #Ice
     x = scale()
-    if(np.abs(vpn).mean() < 1e-12):     # Added against numerical noise of unconnected elements. Abs added!
+
+    if(vce.mean() < 1e-12):     # Added against numerical noise of unconnected elements
         transistorActive.append(0.0)
     else:
-        derV = m.dYdX(x, vpn)   # This works better than m.dYdX(vpn, x) !
-        derI = m.dYdX(x, ipn)
-        #transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
-        transistorActive.append(int(abs(min(derV))>abs(1e-4*max(derV))))
+        derV = m.dYdX(x, vce)   # This works better than m.dYdX(vce, x) !
+        derI = m.dYdX(x, ice)
+        transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
         
 __result =  float(sum(transistorActive))/len(transistorList)
+
 """,
+
             'vector' : False
+
+
             }  
 
 
@@ -194,3 +201,24 @@ __result =  float(sum(transistorActive))/len(transistorList)
     # Cleanup intemediate files
     pe.finalize()
     return cf, results
+
+
+    """
+    #Using diodes:
+    transistorList = ['xds_1','xds_2','xds_3', 'xds_4', 'xds_5', 'xds_6', 'xds_7', 'xds_8','xds_9','xds_10','xds_11','xds_12']  #
+    transistorActive = []
+    for t in transistorList:
+        vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 
+        #ipath() is universal pyopus function to access instance (node) e.g. cint in subcircuit (device) t that is part of another subcircuit xcirc. 
+        ipn = i(ipath('vp', [t, 'xcirc']))    #Ipn
+        x = scale()
+        if(np.abs(vpn).mean() < 1e-12):     # Added against numerical noise of unconnected elements. Abs added!
+            transistorActive.append(0.0)
+        else:
+            derV = m.dYdX(x, vpn)   # This works better than m.dYdX(vpn, x) !
+            derI = m.dYdX(x, ipn)
+            #transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
+            transistorActive.append(int(abs(min(derV))>abs(1e-4*max(derV))))
+            
+    __result =  float(sum(transistorActive))/len(transistorList)
+    """
