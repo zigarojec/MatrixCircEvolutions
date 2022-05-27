@@ -6,14 +6,18 @@
 .subckt T2N2222_resil_nom c b e
 vc c cint dc=0
 vb b bint dc=0
+* Konvergencni rb
+rb bint bintt 1m
 ve e eint dc=0
-q1 (cint bint eint) T2N2222
+q1 (cint bintt eint) T2N2222
 .ends
  
 .subckt T2N2222_resil_sck C B E
 * Failure anti-model
 * Short-circuit over collector-emittor
-q1 (C B E) T2N2222
+* Konvergencni rb
+rb B bint 1m
+q1 (C bint E) T2N2222
 r1 (C E)   r=1
 .ends
  
@@ -36,14 +40,18 @@ re  (E mid) r=1meg
 .subckt 2N2907_resil_nom c b e
 vc c cint dc=0
 vb b bint dc=0
+* Konvergencni rb
+rb bint bintt 1m
 ve e eint dc=0
-q1 (cint bint eint) 2N2907
+q1 (cint bintt eint) 2N2907
 .ends
  
 .subckt 2N2907_resil_sck C B E
 * Failure anti-model
 * Short-circuit over collector-emittor
-q1 (C B E) 2N2907
+* Konvergencni rb
+rb B bint 1m
+q1 (C bint E) 2N2907
 r1 (C E)   r=1
 .ends
  
