@@ -17,6 +17,9 @@ vin (vin inb) dc = 10
 *****Loads*****
 *.param rl=1000k
 *rl (vout 0) r=1meg
-rl (vout 0) r=1k
+*rl (vout 0) r=1k
+rl (vout voutm) r=1k
+vl (voutm 0) dc=0
+
 
 *.end

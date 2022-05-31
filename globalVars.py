@@ -25,7 +25,7 @@ PROBLEMname = 'scoreCirc_rectifier'
 
 seedN = 7		#random seed
 continuee = 	0	#to continue the algorithm from the last run
-optimise = 	0	#turn on/off the global parameter optimizer PSADE
+optimise = 	1	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve
 robustMode = 1      #iterate through all models listed for device when evaluating (works only with MOEA=>1 in this version)
 MOEA = 1	# Multiobjective mode
@@ -43,7 +43,7 @@ NofRANDOMS = 	20*multipl
 tournamentSize = 3
 
 matingProb = 0.6
-topologyGenOperProb = 1     # 0...only parameter optimization
+topologyGenOperProb = 0.8     # 0...only parameter optimization
                             # 1...only topology optimization
 
 

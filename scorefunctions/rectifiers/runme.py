@@ -6,7 +6,6 @@ from pyopus.evaluator.auxfunc import paramList
 import numpy as np
 
 from pyopus.simulator.hspice import ipath
-
 # ROBUST CIRCUIT EVOLUTION
 
 def evaluate_rectifier(filename, **kwargs):
@@ -64,6 +63,12 @@ def evaluate_rectifier(filename, **kwargs):
 			'corners' : [ 'nominal' ],
 			'expression': 'v("vout")',
 			'vector' : True
+		 }, 
+		'power':{
+			'analysis' : 'dc_sweep_tf',
+			'corners' : [ 'nominal' ],
+			'expression': 'np.max(-i("vin")*v("vin","inb")-i("vl")*v("vout"))', # power dissipated on rectifier only (load substracted)
+			'vector' : False
 		 },        
 		'scale' : {
 			'analysis' : 'dc_sweep_tf',
@@ -102,7 +107,12 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
             'measure': 'dcvout_rmse',
             'norm': Nbelow(0.3, failure=10000.0), 	
             'reduce': Rworst()
-        },         
+        },     
+        {
+            'measure': 'power',
+            'norm': Nbelow(0.08, failure=10000.0), 	
+            'reduce': Rworst()
+        },     
     ]
     # End definition
 
@@ -137,6 +147,7 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
             'script': """   
 # Using transistors:
 transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4']  #
+transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xpnps_1', 'xpnps_2', 'xpnps_3']  #
 transistorActive = []
 for t in transistorList:
     #vce = v('cint:' + t + ':xcirc', 'eint:' + t + ':xcirc') #Vce 
