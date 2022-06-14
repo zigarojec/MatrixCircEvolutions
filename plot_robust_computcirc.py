@@ -580,7 +580,8 @@ def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
     
     if not GLOBAL.robustMode:
         target = np.arctan(result[1]['scale']['nominal'])
-        errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+        #errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+        errPlt.plot(result[1]['scale']['nominal'], errorfun(r['vout']['nominal']), '-')
     else:
         target = np.arctan(result[0][1][0]['scale']['nominal'])
         OFFSET = target[0] - result[0][1][0]['vout']['nominal'][0]
@@ -631,7 +632,7 @@ def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
     else:
         voutPlt.plot(result[0][1][0]['scale']['nominal'], 
                     np.arctan(result[0][1][0]['scale']['nominal'] ), 
-                    color = 'red', linestyle = '-.', marker='', label='sqrt($V_{in}$)')
+                    color = 'red', linestyle = '-.', marker='', label='arctan($V_{in}$)')
         first = True
         nexxt = None # 2 or 3 , 2st, 3nd
         count = 0
@@ -677,7 +678,7 @@ def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
 
     voutPlt.legend()
 
-    name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + "_duoplot_vout.eps" #ploting every generation in separate file
+    name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + "_duoplot_vout.png" #ploting every generation in separate file
     plt.savefig(name)
     name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + "_duoplot_vout.pdf" #ploting every generation in separate file
     plt.savefig(name)    
