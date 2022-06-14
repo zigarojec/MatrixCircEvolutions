@@ -558,6 +558,134 @@ def duoplot_abs(generation, generationNum, bestScoresList, result, bestI):
     plt.close()
 
 
+def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
+    """
+    """
+    def errorfun(reality, target):
+      #reality = reality+(target[0]-reality[0])
+      reality = reality + OFFSET
+      #target = target-target[0]
+      return ((reality-target)/np.maximum.reduce([abs(reality), abs(target)]))*100
+
+    fig, (voutPlt, errPlt) = plt.subplots(nrows=1, ncols=2, sharex=True,
+                                        figsize=(12, 4))
+
+    #errPlt.set_title('Err(Vin)=sqrt(Vin)-Vout(Vin)')
+    errPlt.set_title('RelErr($V_{in}$)')
+    #errPlt.set_ylabel('Err [V]')
+    errPlt.set_ylabel('RelErr [%]')
+    errPlt.set_xlabel('$V_{in} [V]$')
+    errPlt.set_ylim([-30, 80])
+
+    
+    if not GLOBAL.robustMode:
+        target = np.arctan(result[1]['scale']['nominal'])
+        errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
+    else:
+        target = np.arctan(result[0][1][0]['scale']['nominal'])
+        OFFSET = target[0] - result[0][1][0]['vout']['nominal'][0]
+        #print(OFFSET)
+        first = True
+        nexxt = None # 2 or 3 , 2st, 3nd
+        count = 0
+        for r in result[0][1]:
+          if first:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'black', linestyle = '-', marker='', label='nominal', linewidth=3)
+              first = False
+              nexxt = 2
+          elif nexxt == 2:
+            count+=1
+            if count <= 2:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'gray', linestyle = '--', marker='', label="failure_himp")
+            else:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'gray', linestyle = '--', marker='')
+            nexxt = 3
+          elif nexxt == 3:
+            errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+            color = 'gray', linestyle = ':', marker='')
+            count+=1
+            if count <= 2:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'gray', linestyle = ':', marker='', label= 'failure_sck')
+            else:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'gray', linestyle = ':', marker='')
+            nexxt = 2
+          else:
+              errPlt.plot(r['scale']['nominal'], errorfun(r['vout']['nominal'], target), 
+              color = 'gray', linestyle = '--', marker='', label='failure')
+
+    errPlt.grid(True)
+    errPlt.legend()
+
+    voutPlt.set_title('$V_{out}(V_{in})$')
+    voutPlt.set_ylabel('$V_{out} [V]$')
+    voutPlt.set_xlabel('$V_{in} [V]$')
+    
+    if not GLOBAL.robustMode:
+        voutPlt.plot(result[1]['scale']['nominal'], target, '.')
+        voutPlt.plot(result[1]['scale']['nominal'], result[1]['vout']['nominal'], '-')
+    else:
+        voutPlt.plot(result[0][1][0]['scale']['nominal'], 
+                    np.arctan(result[0][1][0]['scale']['nominal'] ), 
+                    color = 'red', linestyle = '-.', marker='', label='sqrt($V_{in}$)')
+        first = True
+        nexxt = None # 2 or 3 , 2st, 3nd
+        count = 0
+        multidim = np.empty((0,len(r['scale']['nominal'])), float)
+        for r in result[0][1]:
+          #print(r['vout']['nominal'], len(r['vout']['nominal']))
+          multidim = np.row_stack((multidim, r['vout']['nominal']))
+
+          if first:
+            voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+            color = 'black', linestyle = '-', marker='', label='nominal', linewidth=3)
+            first = False
+            nexxt = 2
+          elif nexxt == 2:
+            count+=1
+            if count <= 2:
+              None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+              #color = 'gray', linestyle = '--', marker='', label="failure_himp")
+            else:
+              None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+              #color = 'gray', linestyle = '--', marker='')
+            nexxt = 3
+          elif nexxt == 3:
+            None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+            #color = 'gray', linestyle = ':', marker='')
+            count+=1
+            if count <= 2:
+              None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+              #color = 'gray', linestyle = ':', marker='', label= 'failure_sck')
+            else:
+              None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+              #color = 'gray', linestyle = ':', marker='')
+            nexxt = 2
+          else:
+            None #voutPlt.plot(r['scale']['nominal'], r['vout']['nominal'], 
+            #color = 'gray', linestyle = '', marker='o', label='failure')
+
+        errmax = np.amax(multidim, axis=0)
+        errmin = np.amin(multidim, axis=0)
+        voutPlt.fill_between(r['scale']['nominal'], errmin, errmax, hatch="||||", alpha=0.4, label="Failure range")
+
+    voutPlt.grid(True)
+
+    voutPlt.legend()
+
+    name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + "_duoplot_vout.eps" #ploting every generation in separate file
+    plt.savefig(name)
+    name = datadirname + "/" + "diversityPlots/gen_" + str(generationNum) + "_duoplot_vout.pdf" #ploting every generation in separate file
+    plt.savefig(name)    
+    #name = datadirname + "/" + "generationPlot" + ".png"
+    #plt.savefig(name) 
+    
+    plt.close()
+
 
 def duoplot_pareto(generation, generationNum, bestScoresList, result, bestI):
     """
@@ -595,5 +723,6 @@ def duoplot_pareto(generation, generationNum, bestScoresList, result, bestI):
 
 #duoplot_sqrt(generation, generationNum, bestScoresList, result, bestI)
 #duoplot_pareto(generation, generationNum, bestScoresList, result, bestI)
-duoplot_abs(generation, generationNum, bestScoresList, result, bestI)
-abscirc_MOEA(generation, generationNum, bestScoresList, result, bestI)
+#duoplot_abs(generation, generationNum, bestScoresList, result, bestI)
+#abscirc_MOEA(generation, generationNum, bestScoresList, result, bestI)
+duoplot_arctan(generation, generationNum, bestScoresList, result, bestI)
