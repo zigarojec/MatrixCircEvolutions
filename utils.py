@@ -580,7 +580,7 @@ def printer(results, stw0, generationNum, **kwargs):
             power.append(result['power']['nominal'])
 
         stdoutstring += "\n\t - dcvout_rmse:      "+ " ".join(f"{r:+.2e}" for r in dcvout_rmse) + "\t"
-        stdoutstring += "\n\t - power [W]:      "+ " ".join(f"{r:+.2e}" for r in power) + "\t"
+        stdoutstring += "\n\t - power [W]:        "+ " ".join(f"{r:+.2e}" for r in power) + "\t"
         stdoutstring += "\n\t - deviceActive: "+  str(results[0][1][0]['deviceActive']['nominal']) + "\t"       
     else:
         stdoutstring += "\n\t - dcvout_rmse:      "+ f"{results[1]['dcvout_rmse']['nominal']:.2E}" + "\t"

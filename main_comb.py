@@ -118,6 +118,7 @@ if __name__=='__main__':
     'models_for_start.inc':'.',        # TODO TODO TODO remove this to a config file which is in gitignore!!
     #'topdc_robust_commonemitter.cir':'.', 
     'topdc.cir':'.',
+    'topdc_robust_squareroot.cir':'.',
   }))
   
   generationNum = 0

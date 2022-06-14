@@ -6,10 +6,11 @@ from pyopus.evaluator.auxfunc import paramList
 import numpy as np
 
 from pyopus.simulator.hspice import ipath
+
 # ROBUST CIRCUIT EVOLUTION
 
-def evaluate_rectifier(filename, **kwargs):
-    """Evaluation script for pyopus. It evaluates performance of simple rectifier. 
+def evaluate_arctancirc(filename, **kwargs):
+    """Evaluation script for pyopus. It evaluates performance of simple logarithmic circuit. 
     
     """    
     heads={
@@ -18,18 +19,18 @@ def evaluate_rectifier(filename, **kwargs):
             'moddefs': {
                 #'def':     { 'file': '/spice/commonemitter/g_' + str(generation) + '_i_' + str(individual) + '_subckt.cir' },
                 'def':     { 'file': str(filename) },
-                'tb':      { 'file': 'topdc.cir'},
+                'tb':      { 'file': 'topdc_robust_squareroot.cir'},
                 'models':   {'file': 'models_for_start.inc'} # those files are !for now! to be accessible in main.py homefolder
                 }, 
             'settings':{
                 'debug': 0,
-                'timeout' : 2, # Preizkusimo timeout 
+                'timeout' : 5, # Preizkusimo timeout 
                     },
             'params':{
                     },
             'options': {
                 'method': 'trap', 
-                'noautoconv': False,		#prevent Spice to try to converge for every price
+                'noautoconv': True,		#prevent Spice to try to converge for every price
                     }   
             }
         }
@@ -37,7 +38,7 @@ def evaluate_rectifier(filename, **kwargs):
         'op': {
             'head': 'opus', 
             'modules': [ 'def', 'tb', 'models' ], 
-            'params': {}, 
+            'params': {'rl':1000e3}, 
             'command': "op()",
         }, 
         'dc_sweep_tf': {
@@ -45,7 +46,7 @@ def evaluate_rectifier(filename, **kwargs):
             'modules': [ 'def', 'tb', 'models' ], 
             'params': {}, 
             'saves': [ ],  
-            'command': "dc(-50, 50, 'lin', 100, 'vin', 'dc')"
+            'command': "dc(0.1, 10, 'lin', 100, 'vin', 'dc')"
             },            
         }
 
@@ -63,12 +64,6 @@ def evaluate_rectifier(filename, **kwargs):
 			'corners' : [ 'nominal' ],
 			'expression': 'v("vout")',
 			'vector' : True
-		 }, 
-		'power':{
-			'analysis' : 'dc_sweep_tf',
-			'corners' : [ 'nominal' ],
-			'expression': 'np.max(-i("vin")*v("vin","inb")-i("vl")*v("vout"))', # power dissipated on rectifier only (load substracted)
-			'vector' : False
 		 },        
 		'scale' : {
 			'analysis' : 'dc_sweep_tf',
@@ -80,15 +75,17 @@ def evaluate_rectifier(filename, **kwargs):
             'analysis' : 'dc_sweep_tf',
             'corners' : [ 'nominal' ],
             'script': """
-#targets = np.abs(v("vin"))
-targets = np.abs(scale())
+targets = np.arctan(v("vin"))
 outputs = v("vout")
+x = v("vin")
 #__result = np.sqrt((((outputs-outputs[0]) - (targets-targets[0])) ** 2).mean()) # Offset excluded!
-__result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
+#__result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
+__result = np.sqrt((((outputs - targets) ** 2)*x[::-1]/x.min()).mean()) # Offset INCLUDED, weights included
+#x[::-1]/x.min()
 """,
             'vector' : False,
-        },               
-        
+        },
+
         }
     corners = {
         'nominal': {
@@ -105,14 +102,9 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
     definition = [
         {
             'measure': 'dcvout_rmse',
-            'norm': Nbelow(0.3, failure=10000.0), 	
+            'norm': Nbelow(1e-3, failure=10000.0), 	
             'reduce': Rworst()
-        },     
-        {
-            'measure': 'power',
-            'norm': Nbelow(0.08, failure=10000.0), 	
-            'reduce': Rworst()
-        },     
+        },         
     ]
     # End definition
 
@@ -145,32 +137,26 @@ __result = np.sqrt(((outputs - targets) ** 2).mean()) # Offset INCLUDED!
 
 
             'script': """   
-# Using transistors:
-transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xnpns_4', 'xpnps_1', 'xpnps_2', 'xpnps_3', 'xpnps_4']  #
-transistorList = ['xnpns_1', 'xnpns_2', 'xnpns_3', 'xpnps_1', 'xpnps_2', 'xpnps_3']  #
+#transistorList = ['xzds_1','xzds_2','xzds_3']  #
+transistorList = ['xds_1', 'xds_2', 'xds_3', 'xds_4'] #, 'xds_5', 'xds_6', 'xds_7', 'xds_8', 'xds_9', 'xds_10']  #
+
 transistorActive = []
 for t in transistorList:
-    #vce = v('cint:' + t + ':xcirc', 'eint:' + t + ':xcirc') #Vce 
-    vce = v(ipath('cint', [t, 'xcirc']), ipath('eint', [t, 'xcirc'])) #Vce 
+    vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 
     #ipath() is universal pyopus function to access instance (node) e.g. cint in subcircuit (device) t that is part of another subcircuit xcirc. 
-    #ice = i('vc:' + t + ':xcirc')    #Ice
-    ice = i(ipath('vc', [t, 'xcirc']))    #Ice
+    ipn = i(ipath('vp', [t, 'xcirc']))    #Ipn
     x = scale()
-
-    if(vce.mean() < 1e-12):     # Added against numerical noise of unconnected elements
+    if(vpn.mean() < 1e-12):     # Added against numerical noise of unconnected elements
         transistorActive.append(0.0)
     else:
-        derV = m.dYdX(x, vce)   # This works better than m.dYdX(vce, x) !
-        derI = m.dYdX(x, ice)
-        transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
+        derV = m.dYdX(x, vpn)   # This works better than m.dYdX(vpn, x) !
+        derI = m.dYdX(x, ipn)
+        #transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
+        transistorActive.append(int(abs(min(derV))>abs(1e-4*max(derV))))
         
 __result =  float(sum(transistorActive))/len(transistorList)
-
 """,
-
             'vector' : False
-
-
             }  
 
 
@@ -212,24 +198,3 @@ __result =  float(sum(transistorActive))/len(transistorList)
     # Cleanup intemediate files
     pe.finalize()
     return cf, results
-
-
-    """
-    #Using diodes:
-    transistorList = ['xds_1','xds_2','xds_3', 'xds_4', 'xds_5', 'xds_6', 'xds_7', 'xds_8','xds_9','xds_10','xds_11','xds_12']  #
-    transistorActive = []
-    for t in transistorList:
-        vpn = v(ipath('pint', [t, 'xcirc']), ipath('nint', [t, 'xcirc'])) #Vpn 
-        #ipath() is universal pyopus function to access instance (node) e.g. cint in subcircuit (device) t that is part of another subcircuit xcirc. 
-        ipn = i(ipath('vp', [t, 'xcirc']))    #Ipn
-        x = scale()
-        if(np.abs(vpn).mean() < 1e-12):     # Added against numerical noise of unconnected elements. Abs added!
-            transistorActive.append(0.0)
-        else:
-            derV = m.dYdX(x, vpn)   # This works better than m.dYdX(vpn, x) !
-            derI = m.dYdX(x, ipn)
-            #transistorActive.append(int(abs(min(derV))>abs(1/100*max(derV)) and abs(min(derI))>abs(1/100*max(derI))))
-            transistorActive.append(int(abs(min(derV))>abs(1e-4*max(derV))))
-            
-    __result =  float(sum(transistorActive))/len(transistorList)
-    """

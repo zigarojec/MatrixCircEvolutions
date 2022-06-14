@@ -5,11 +5,11 @@ from reproduction import makeNetlist, makeNetlist_netlister
 #import ... runme2
 from  globalVars import *
 
-import scorefunctions.arithmetic.runme as runme
+import scorefunctions.arithmetic.runme_arctan as runme
 
 import os, sys
 
-def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
+def scoreCirc_arctan_resilenceMode(circuit, gen, indi, MOEAMODE):
     """
     scoreCirc_squarerootcirc_resilenceMode is a wrapper function which calls a runme file. 
     In resilenceMode it adds multiple scores (costs) together. 
@@ -17,13 +17,12 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
     """
 
     debug = 0
-
     def evaluateNetlistAppendResults(circuitFilename, results_list):
         """
         Internal function for netlist evaluation call. 
         """
         #makeNetlist_netlister(circuit)
-        cost, results = runme.evaluate_squarerootcirc(circuit.filename)
+        cost, results = runme.evaluate_arctancirc(circuit.filename)
         results_list.append(results)
         return cost
 
@@ -49,7 +48,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
             
             # Nominal models evaluation.
             makeNetlist_netlister(circuit)  
-            score, results = runme.evaluate_squarerootcirc(circuit.filename, nominalTopology=True)
+            score, results = runme.evaluate_arctancirc(circuit.filename, nominalTopology=True)
             results_list.append(results)
             #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
             os.remove(circuit.filename) #cleanup current subcircuit
@@ -66,7 +65,7 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
                                           ElementNo =  int(elm_num[1]),
                                           ModelName = mod)
                     # ----------------------------------- #
-                    score, results = runme.evaluate_squarerootcirc(circuit.filename)
+                    score, results = runme.evaluate_arctancirc(circuit.filename)
                     results_list.append(results)
                     score_array = np.append(score_array, score)
                     # ----------------------------------- # 
@@ -74,32 +73,33 @@ def scoreCirc_squareroot_resilenceMode(circuit, gen, indi, MOEAMODE):
                     if debug > 2:    
                         print("\t\tG_" + str(gen) + "_I_" + str(indi) + " SCORE:", score)
                         
-                    #input("Here!") # Wait and inspect every netlist please PROCEED AND TEST HERE
+                    #input() # Wait and inspect every netlist please PROCEED AND TEST HERE
                     os.remove(circuit.filename) #cleanup current subcircuit
 
-        #----------------------------------------------------------Score function SINGLE-OBJECTIVE
-        if MOEAMODE == 0:
-            #score =  (1 + score_array.std())*score_array.sum()  # Mind the gap between device evaluation scores
-            score = score_array.sum()
+            #----------------------------------------------------------Score function SINGLE-OBJECTIVE
+            if MOEAMODE == 0:
+                #score =  (1 + score_array.std())*score_array.sum()  # Mind the gap between device evaluation scores
+                score = score_array.sum()
 
-        #----------------------------------------------------------Score function MULTI-OBJECTIVE
-        else: #MOEAMODE == 1
-            score = np.array([score_array[0], score_array.max(), score_array.std()])
+            #----------------------------------------------------------Score function MULTI-OBJECTIVE
+            else: #MOEAMODE == 1
+                score = np.array([score_array[0], score_array.max(), score_array.std()])
 
-            #print "score64", score
-            if gen > 30:
-                for i in range(0, len(score)): #round to 5 decimal points
-                    score[i] = np.float16(score[i]) 
-                #print "score16", score
-            score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
-        #-------------------------------------------------------------------
+                #print "score64", score
+                if gen > 30:
+                    for i in range(0, len(score)): #round to 5 decimal points
+                        score[i] = np.float16(score[i]) 
+                    #print "score16", score
+                score = np.ndarray.tolist(score) #for faster non-dominant sorting let the score be python array instead of np.array 5.7.2017
+            #-------------------------------------------------------------------
 
+            
+            return score, results_list
         
-        return score, results_list
-    
-    else:
-        # Nominal models evaluation.
-        makeNetlist_netlister(circuit)  
-        score, results = runme.evaluate_squarerootcirc(circuit.filename, nominalTopology=True)
-        os.remove(circuit.filename) #cleanup current subcircuit
+        else:
+            # Nominal models evaluation.
+            makeNetlist_netlister(circuit)  
+            score, results = runme.evaluate_arctancirc(circuit.filename, nominalTopology=True)
+            #input()
+            os.remove(circuit.filename) #cleanup current subcircuit
     return score, results

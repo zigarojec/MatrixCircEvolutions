@@ -13,8 +13,8 @@ import numpy as np
 from buildingBlocksBank import buildBlocks, paramBounds
 
 #Define the cost function--------------------------
-PROBLEMpath = 'scorefunctions/rectifiers/'	# do not forget the last slash! "path/to/the/module/"
-PROBLEMname = 'scoreCirc_rectifier'
+PROBLEMpath = 'scorefunctions/arithmetic/'	# do not forget the last slash! "path/to/the/module/"
+PROBLEMname = 'scoreCirc_arctan_resilenceMode'
 #---------------------------------------------------
 #Problem names available: (obsolete, please inspect the scorefunctions folder)
 # scoreCirc_ActiveFilter_2
@@ -23,12 +23,12 @@ PROBLEMname = 'scoreCirc_rectifier'
 # scoreCirc_HighPass
 # scoreCirc_commonEmitterAmp_resilenceMode
 
-seedN = 7		#random seed
+seedN = 0		#random seed
 continuee = 	0	#to continue the algorithm from the last run
 optimise = 	1	#turn on/off the global parameter optimizer PSADE
 insertAdam = 	0	#insert a working circuit to further evolve
-robustMode = 1      #iterate through all models listed for device when evaluating (works only with MOEA=>1 in this version)
-MOEA = 1	# Multiobjective mode
+robustMode = 0      #iterate through all models listed for device when evaluating (works only with MOEA=>1 in this version)
+MOEA = 0	# Multiobjective mode
 			#(if continuee == 1) 
 			#	copy backdata.pkl into main folder manually! 
 

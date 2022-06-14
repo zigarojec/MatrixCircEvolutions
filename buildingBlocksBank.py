@@ -14,8 +14,8 @@ My advice - before you trigger the run, make sure you know, what kind of a circu
 """
 import numpy as np
 # This array contains the set of circuit nodes, that are accessible to the outer world. 
-outerConns = ['ina','inb', 'outa', 'outb']
-
+#outerConns = ['ina','inb', 'outa', 'outb']
+outerConns = ['vout', 'gnd']
 """
     {	#Simple resistor
 'SpiceElementType': 'r',	      # How this element is encoded (initiated) in Spice netlist  
@@ -33,7 +33,7 @@ buildBlocks =  [
       {	#Simple resistor
 	'SpiceElementType': 'r',	# How this element is encoded in Spice netlist
 	'Element': 'Rs',
-	'Quantity': 3, #<---NOTE
+	'Quantity': 0, #<---NOTE
 	'NofPins':  2,
 	'Model': '',
 	'ParamTypes': {'r':'r'},
@@ -74,7 +74,7 @@ buildBlocks =  [
       {	#NPN BJ Transistor MULTI MODEL ROBUST CHECK
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'NPNs',
-	'Quantity': 3,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
+	'Quantity': 0,#<---NOTE	# Mind the analysis in runme.py if hardcoded to some elements. 
 	'NofPins':  3,
 	'Model': ['T2N2222_resil_nom', 'T2N2222_resil_himp'], #, 'T2N2222_resil_sck'], #,  
 	'ParamTypes': {},     
@@ -83,7 +83,7 @@ buildBlocks =  [
       {	#PNP BJ Transistor MULTI MODEL ROBUST CHECK TEST
 	'SpiceElementType': 'x',   # Since it is a complex subckt it is an x, not a q... 
 	'Element':'PNPs',
-	'Quantity': 3,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
+	'Quantity': 0,#<---NOTE # Mind the analysis in runme.py if hardcoded to some elements.
 	'NofPins':  3,
 	'Model': ['2N2907_resil_nom', '2N2907_resil_himp'], #, '2N2907_resil_sck'], #,  
 	'ParamTypes': {},     
@@ -99,7 +99,7 @@ buildBlocks =  [
       {	#Rectifier diode D1N4148 ROBUST MODE
 	'SpiceElementType': 'x',	 # Since it is a combined subckt it is an x, not a q... 
 	'Element':'Ds',
-	'Quantity': 0,#<---NOTE
+	'Quantity': 5,#<---NOTE
 	'NofPins':  2,
 	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_himp'],
 	'ParamTypes': {},
@@ -115,7 +115,7 @@ buildBlocks =  [
       {	#Voltage supply
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'VDC',
-	'Quantity': 0,#<---NOTE
+	'Quantity': 1,#<---NOTE
 	'NofPins':  2,
 	'Model': 'vdc',
 	'ParamTypes': {'v':'v'},     
@@ -124,7 +124,7 @@ buildBlocks =  [
       {	#Resistor ROBUST MODE
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'rrob',
-	'Quantity': 0,#<---NOTE
+	'Quantity': 10,#<---NOTE
 	'NofPins':  2,
 	'Model': ['resistor_nom', 'resistor_himp', 'resistor_sck'],
 	'ParamTypes': {'r':'r'},     
