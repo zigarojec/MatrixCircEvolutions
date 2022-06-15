@@ -126,7 +126,7 @@ buildBlocks =  [
 	'Element':'rrob',
 	'Quantity': 10,#<---NOTE
 	'NofPins':  2,
-	'Model': ['resistor_nom', 'resistor_himp', 'resistor_sck'],
+	'Model': ['resistor_nom', 'resistor_himp'], #, 'resistor_sck'],
 	'ParamTypes': {'r':'r'},     
 	  },
 

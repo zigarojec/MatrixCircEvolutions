@@ -563,7 +563,7 @@ def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
     """
     def errorfun(reality, target):
       #reality = reality+(target[0]-reality[0])
-      reality = reality + OFFSET
+      #reality = reality + OFFSET
       #target = target-target[0]
       return ((reality-target)/np.maximum.reduce([abs(reality), abs(target)]))*100
 
@@ -581,7 +581,8 @@ def duoplot_arctan(generation, generationNum, bestScoresList, result, bestI):
     if not GLOBAL.robustMode:
         target = np.arctan(result[1]['scale']['nominal'])
         #errPlt.plot(result[1]['scale']['nominal'], target-result[1]['vout']['nominal'], '-')
-        errPlt.plot(result[1]['scale']['nominal'], errorfun(r['vout']['nominal']), '-')
+        r = result[1]['vout']['nominal']
+        errPlt.plot(result[1]['scale']['nominal'], errorfun(r, target), '-')
     else:
         target = np.arctan(result[0][1][0]['scale']['nominal'])
         OFFSET = target[0] - result[0][1][0]['vout']['nominal'][0]
