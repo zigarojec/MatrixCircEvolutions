@@ -9,7 +9,7 @@ import scorefunctions.arithmetic.runme_arctan as runme
 
 import os, sys
 
-def scoreCirc_arctan_resilenceMode(circuit, gen, indi, MOEAMODE):
+def scoreCirc_arctan_resilenceMode(circuit, gen, indi, MOEAMODE, ROBUSTMODE=robustMode):
     """
     scoreCirc_squarerootcirc_resilenceMode is a wrapper function which calls a runme file. 
     In resilenceMode it adds multiple scores (costs) together. 
@@ -43,7 +43,7 @@ def scoreCirc_arctan_resilenceMode(circuit, gen, indi, MOEAMODE):
     else:
         # Create netlist and calculate the cost function. 
         # Based on all models that are being used, create a series of evaluations, using the models listed in MODELSCHEME!
-        if robustMode:
+        if ROBUSTMODE:
             results_list = []
             
             # Nominal models evaluation.

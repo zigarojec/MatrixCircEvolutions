@@ -60,7 +60,7 @@ class circuitUnderOptimiser:
     """Problem to optimise."""
     circuitHOT = slimCircuit(self.BigCircuitMatrix, ValueVector)
     circuitHOT.fullRedundancyMatrix = self.fullMatrix
-    score, results = self.PROBLEM(circuitHOT, 1, random.randint(1,100000),False) #HERE! Every evaluated file gets a random number between 1 and 100000, since they spawn in the root folder when run in single-thread mode. With a dirty and simple solution comes a stupid hazard, since files two can get the same name with the probability of 1/1000000. You have been warned. 
+    score, results = self.PROBLEM(circuitHOT, 1, random.randint(1,100000),False, ROBUSTMODE=False) #HERE! Every evaluated file gets a random number between 1 and 100000, since they spawn in the root folder when run in single-thread mode. With a dirty and simple solution comes a stupid hazard, since files two can get the same name with the probability of 1/1000000. You have been warned. 
     return score
 
 probLOW = returnMinValueVector()

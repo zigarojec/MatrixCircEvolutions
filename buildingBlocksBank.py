@@ -101,7 +101,7 @@ buildBlocks =  [
 	'Element':'Ds',
 	'Quantity': 5,#<---NOTE
 	'NofPins':  2,
-	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_sck', 'D1N4148_resil_himp'],
+	'Model': ['D1N4148_resil_nom', 'D1N4148_resil_himp'], #, 'D1N4148_resil_sck'],
 	'ParamTypes': {},
 	  },
       {	#Rectifier diode IN SERIES D1N4148 ROBUST MODE
@@ -124,7 +124,7 @@ buildBlocks =  [
       {	#Resistor ROBUST MODE
 	'SpiceElementType': 'x', # Check subcircuit in models
 	'Element':'rrob',
-	'Quantity': 10,#<---NOTE
+	'Quantity': 5,#<---NOTE
 	'NofPins':  2,
 	'Model': ['resistor_nom', 'resistor_himp'], #, 'resistor_sck'],
 	'ParamTypes': {'r':'r'},     
