@@ -31,14 +31,25 @@ INSTALLATIONS
 Before using this software you will have to follow the installations guide for PyOPUS, a framework for analog circuit optimization in Python. 
 http://fides.fe.uni-lj.si/pyopus/quickstart.html
 
+PREPARATION
+
+Put whole project under a new folder _MAIN_work
+
+Create _MAIN_data folder in the same folder as _MAIN_work 
+
 USAGE
 
 Set (choose) your scorefunctions.
+
 Set globalVars.py
 
 Run main.py for single-objective search.
+
 Run main_moea.py for multi-objective search.
+
 Run main_comb.py for search based on globalVars.py setting (single or multiobjective - automatically).
+
+
 
 REFERENCES
 
