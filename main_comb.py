@@ -213,7 +213,7 @@ if __name__=='__main__':
     currentBestScore = hotGen.scores[sortedPool_Indices[0]]
   
   #najboljsi v generaciji je...
-  print(":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore))
+  # print(":::GENERATION %04.d - BEST ONE::: %f ::YEAH!::" %(generationNum,currentBestScore))
   
   if globalVars.MOEA:
     None
