@@ -50,6 +50,8 @@ Run main_moea.py for multi-objective search.
 Run main_comb.py for search based on globalVars.py setting (single or multiobjective - automatically).
 
 
+AUTHORS
+Žiga Rojec, Árpád Bűrmen, Iztok Fajfar (Electronics Design Automation Laboratory, Faculty of Electrical Engineering, Universitly of Ljubljana, Slovenia)
 
 REFERENCES
 
